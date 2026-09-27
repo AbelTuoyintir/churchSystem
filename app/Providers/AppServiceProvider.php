@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Person::class, \App\Policies\PersonPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Household::class, \App\Policies\HouseholdPolicy::class);
     }
 }
