@@ -1,22 +1,6 @@
 <?php
 
-use App\Http\Controllers\AssignmentController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\ContributionController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\FundController;
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\GroupMemberController;
-use App\Http\Controllers\HouseholdController;
-use App\Http\Controllers\HouseholdMemberController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\MessageRecipientController;
-use App\Http\Controllers\PersonController;
-use App\Http\Controllers\PledgeController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\TeamMemberController;
-use App\Http\Controllers\TeamPositionController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
