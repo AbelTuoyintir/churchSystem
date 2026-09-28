@@ -17,6 +17,8 @@ use App\Livewire\People\Index as PeopleIndex;
 use App\Livewire\People\Form as PeopleForm;
 use App\Livewire\Households\Index as HouseholdsIndex;
 use App\Livewire\Households\Form as HouseholdsForm;
+use App\Livewire\Groups\Index as GroupsIndex;
+use App\Livewire\Groups\Form as GroupsForm;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/people', PeopleIndex::class)->name('people.index');
@@ -26,10 +28,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/households', HouseholdsIndex::class)->name('households.index');
     Route::get('/households/create', HouseholdsForm::class)->name('households.create');
     Route::get('/households/{household}/edit', HouseholdsForm::class)->name('households.edit');
+
+    Route::get('/groups', GroupsIndex::class)->name('groups.index');
+    Route::get('/groups/create', GroupsForm::class)->name('groups.create');
+    Route::get('/groups/{group}/edit', GroupsForm::class)->name('groups.edit');
 });
 Route::resource('household-members', HouseholdMemberController::class);
-Route::resource('groups', GroupController::class);
-Route::resource('group-members', GroupMemberController::class);
 Route::resource('services', ServiceController::class);
 Route::resource('events', EventController::class);
 Route::resource('attendances', AttendanceController::class);
