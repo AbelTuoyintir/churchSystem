@@ -19,6 +19,9 @@ use App\Livewire\Households\Index as HouseholdsIndex;
 use App\Livewire\Households\Form as HouseholdsForm;
 use App\Livewire\Groups\Index as GroupsIndex;
 use App\Livewire\Groups\Form as GroupsForm;
+use App\Livewire\Messages\Index as MessagesIndex;
+use App\Livewire\Messages\Form as MessagesForm;
+use App\Livewire\Messages\Show as MessagesShow;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/people', PeopleIndex::class)->name('people.index');
@@ -32,6 +35,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/groups', GroupsIndex::class)->name('groups.index');
     Route::get('/groups/create', GroupsForm::class)->name('groups.create');
     Route::get('/groups/{group}/edit', GroupsForm::class)->name('groups.edit');
+
+    Route::get('/messages', MessagesIndex::class)->name('messages.index');
+    Route::get('/messages/create', MessagesForm::class)->name('messages.create');
+    Route::get('/messages/{message}/edit', MessagesForm::class)->name('messages.edit');
+    Route::get('/messages/{message}', MessagesShow::class)->name('messages.show');
 });
 Route::resource('household-members', HouseholdMemberController::class);
 Route::resource('services', ServiceController::class);
@@ -40,7 +48,6 @@ Route::resource('attendances', AttendanceController::class);
 Route::resource('funds', FundController::class);
 Route::resource('contributions', ContributionController::class);
 Route::resource('pledges', PledgeController::class);
-Route::resource('messages', MessageController::class);
 Route::resource('message-recipients', MessageRecipientController::class);
 Route::resource('teams', TeamController::class);
 Route::resource('team-positions', TeamPositionController::class);
