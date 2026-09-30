@@ -52,21 +52,12 @@
                 </a>
                 @endcan
 
-                @can('viewAny', App\Models\Service::class)
-                <a href="{{ route('services.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 {{ request()->routeIs('services.*') ? 'bg-gray-800 text-white' : 'text-gray-300' }}">
+                @can('viewAny', App\Models\Message::class)
+                <a href="{{ route('messages.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 {{ request()->routeIs('messages.*') ? 'bg-gray-800 text-white' : 'text-gray-300' }}">
                     <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    Services
-                </a>
-                @endcan
-
-                @can('viewAny', App\Models\Attendance::class)
-                <a href="{{ route('attendances.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 {{ request()->routeIs('attendances.*') ? 'bg-gray-800 text-white' : 'text-gray-300' }}">
-                    <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                    Attendance
+                    Messages
                 </a>
                 @endcan
             </nav>

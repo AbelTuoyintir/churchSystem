@@ -19,9 +19,9 @@ use App\Livewire\Households\Index as HouseholdsIndex;
 use App\Livewire\Households\Form as HouseholdsForm;
 use App\Livewire\Groups\Index as GroupsIndex;
 use App\Livewire\Groups\Form as GroupsForm;
-use App\Livewire\Services\Index as ServicesIndex;
-use App\Livewire\Services\Form as ServicesForm;
-use App\Livewire\Attendance\Index as AttendanceIndex;
+use App\Livewire\Messages\Index as MessagesIndex;
+use App\Livewire\Messages\Form as MessagesForm;
+use App\Livewire\Messages\Show as MessagesShow;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
@@ -40,18 +40,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/groups/create', GroupsForm::class)->name('groups.create');
     Route::get('/groups/{group}/edit', GroupsForm::class)->name('groups.edit');
 
-    Route::get('/services', ServicesIndex::class)->name('services.index');
-    Route::get('/services/create', ServicesForm::class)->name('services.create');
-    Route::get('/services/{service}/edit', ServicesForm::class)->name('services.edit');
-
-    Route::get('/attendances', AttendanceIndex::class)->name('attendances.index');
+    Route::get('/messages', MessagesIndex::class)->name('messages.index');
+    Route::get('/messages/create', MessagesForm::class)->name('messages.create');
+    Route::get('/messages/{message}/edit', MessagesForm::class)->name('messages.edit');
+    Route::get('/messages/{message}', MessagesShow::class)->name('messages.show');
 });
 Route::resource('household-members', HouseholdMemberController::class);
 Route::resource('events', EventController::class);
 Route::resource('funds', FundController::class);
 Route::resource('contributions', ContributionController::class);
 Route::resource('pledges', PledgeController::class);
-Route::resource('messages', MessageController::class);
 Route::resource('message-recipients', MessageRecipientController::class);
 Route::resource('teams', TeamController::class);
 Route::resource('team-positions', TeamPositionController::class);

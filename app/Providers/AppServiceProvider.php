@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Contracts\MessageSender::class, \App\Services\NullMessageSender::class);
     }
 
     /**
@@ -21,5 +21,6 @@ class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Person::class, \App\Policies\PersonPolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Household::class, \App\Policies\HouseholdPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Message::class, \App\Policies\MessagePolicy::class);
     }
 }
