@@ -56,9 +56,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::resource('household-members', HouseholdMemberController::class);
-Route::resource('services', ServiceController::class);
 Route::resource('events', EventController::class);
-Route::resource('attendances', AttendanceController::class);
 Route::resource('funds', FundController::class);
 Route::resource('contributions', ContributionController::class);
 Route::resource('pledges', PledgeController::class);

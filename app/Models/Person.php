@@ -48,6 +48,11 @@ class Person extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
     public function user(): HasOne
     {
         return $this->hasOne(User::class);
