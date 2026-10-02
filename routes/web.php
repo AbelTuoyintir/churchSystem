@@ -1,18 +1,18 @@
 <?php
 
 use App\Http\Controllers\AssignmentController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\FundController;
 use App\Http\Controllers\HouseholdMemberController;
 use App\Http\Controllers\MessageRecipientController;
-use App\Http\Controllers\PledgeController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamPositionController;
+use App\Livewire\Attendance\Index as AttendanceIndex;
+use App\Livewire\Contributions\Form as ContributionsForm;
+use App\Livewire\Contributions\Index as ContributionsIndex;
+use App\Livewire\Funds\Form as FundsForm;
+use App\Livewire\Funds\Index as FundsIndex;
 use App\Livewire\Groups\Form as GroupsForm;
 use App\Livewire\Groups\Index as GroupsIndex;
 use App\Livewire\Households\Form as HouseholdsForm;
@@ -22,6 +22,10 @@ use App\Livewire\Messages\Index as MessagesIndex;
 use App\Livewire\Messages\Show as MessagesShow;
 use App\Livewire\People\Form as PeopleForm;
 use App\Livewire\People\Index as PeopleIndex;
+use App\Livewire\Pledges\Form as PledgesForm;
+use App\Livewire\Pledges\Index as PledgesIndex;
+use App\Livewire\Services\Form as ServicesForm;
+use App\Livewire\Services\Index as ServicesIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -53,13 +57,28 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/messages/create', MessagesForm::class)->name('messages.create');
     Route::get('/messages/{message}/edit', MessagesForm::class)->name('messages.edit');
     Route::get('/messages/{message}', MessagesShow::class)->name('messages.show');
+
+    Route::get('/services', ServicesIndex::class)->name('services.index');
+    Route::get('/services/create', ServicesForm::class)->name('services.create');
+    Route::get('/services/{service}/edit', ServicesForm::class)->name('services.edit');
+
+    Route::get('/attendances', AttendanceIndex::class)->name('attendances.index');
+
+    Route::get('/funds', FundsIndex::class)->name('funds.index');
+    Route::get('/funds/create', FundsForm::class)->name('funds.create');
+    Route::get('/funds/{fund}/edit', FundsForm::class)->name('funds.edit');
+
+    Route::get('/contributions', ContributionsIndex::class)->name('contributions.index');
+    Route::get('/contributions/create', ContributionsForm::class)->name('contributions.create');
+    Route::get('/contributions/{contribution}/edit', ContributionsForm::class)->name('contributions.edit');
+
+    Route::get('/pledges', PledgesIndex::class)->name('pledges.index');
+    Route::get('/pledges/create', PledgesForm::class)->name('pledges.create');
+    Route::get('/pledges/{pledge}/edit', PledgesForm::class)->name('pledges.edit');
 });
 
 Route::resource('household-members', HouseholdMemberController::class);
 Route::resource('events', EventController::class);
-Route::resource('funds', FundController::class);
-Route::resource('contributions', ContributionController::class);
-Route::resource('pledges', PledgeController::class);
 Route::resource('message-recipients', MessageRecipientController::class);
 Route::resource('teams', TeamController::class);
 Route::resource('team-positions', TeamPositionController::class);
