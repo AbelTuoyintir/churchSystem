@@ -14,7 +14,11 @@ class PersonPolicy
 
     public function view(User $user, Person $person): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader', 'viewer']);
+        if (in_array($user->role, ['admin', 'staff', 'leader', 'viewer'])) {
+            return true;
+        }
+
+        return $user->person_id !== null && (int) $user->person_id === (int) $person->id;
     }
 
     public function create(User $user): bool
