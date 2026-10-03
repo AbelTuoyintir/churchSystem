@@ -60,7 +60,7 @@
           <a href="#" class="hover:text-brand transition-colors">Community</a>
           <a href="#" class="hover:text-brand transition-colors">Resources</a>
           <a href="#" class="hover:text-brand transition-colors">Contact</a>
-          <a href="#" class="inline-block bg-brand text-white font-semibold text-sm px-5 py-2 rounded-full shadow-md shadow-brand/25 hover:bg-[#1f4738] hover:-translate-y-px transition-all">
+          <a href="{{ route('login') }}" class="inline-block bg-brand text-white font-semibold text-sm px-5 py-2 rounded-full shadow-md shadow-brand/25 hover:bg-[#1f4738] hover:-translate-y-px transition-all">
             Sign in
           </a>
         </div>
