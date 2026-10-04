@@ -61,6 +61,19 @@ test('member can view member portal with person details', function () {
         ->assertSee('Sunday Service');
 });
 
+test('member portal handles unlinked member user account smoothly', function () {
+    $user = User::factory()->create([
+        'person_id' => null,
+        'role' => 'member',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->assertStatus(200)
+        ->assertSee('Your user account is not linked to a member profile yet.');
+});
+
 test('dashboard redirects member role to member-portal', function () {
     $user = User::factory()->create(['role' => 'member']);
 
