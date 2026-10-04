@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('members.portal')" :active="request()->routeIs('members.portal')">
                         {{ __('My Portal') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('personas.index')" :active="request()->routeIs('personas.index')">
+                        {{ __('User Personas') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -75,6 +78,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('members.portal')" :active="request()->routeIs('members.portal')">
                 {{ __('My Portal') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('personas.index')" :active="request()->routeIs('personas.index')">
+                {{ __('User Personas') }}
             </x-responsive-nav-link>
         </div>
 

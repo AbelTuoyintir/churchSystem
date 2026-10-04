@@ -56,12 +56,13 @@
         <!-- Nav Links -->
         <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.95rem] font-medium text-[#2e3a35]">
           <a href="#" class="hover:text-brand transition-colors">Home</a>
-          <a href="#" class="hover:text-brand transition-colors">Features</a>
-          <a href="#" class="hover:text-brand transition-colors">Community</a>
-          <a href="#" class="hover:text-brand transition-colors">Resources</a>
-          <a href="#" class="hover:text-brand transition-colors">Contact</a>
+          <a href="#features" class="hover:text-brand transition-colors">Features</a>
+          <a href="#personas" class="hover:text-brand transition-colors">User Personas</a>
           <a href="{{ route('login') }}" class="inline-block bg-brand text-white font-semibold text-sm px-5 py-2 rounded-full shadow-md shadow-brand/25 hover:bg-[#1f4738] hover:-translate-y-px transition-all">
             Sign in
+          </a>
+          <a href="{{ route('register') }}" class="inline-block border border-brand text-brand font-semibold text-sm px-5 py-2 rounded-full hover:bg-brand/5 transition-all">
+            Register
           </a>
         </div>
       </nav>
@@ -139,8 +140,67 @@
       </div>
     </div>
 
+    <!-- ================= USER PERSONAS SECTION ================= -->
+    <section id="personas" class="pb-20">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-brand font-semibold text-sm uppercase tracking-wider block mb-2">Built for Every Ministry Role</span>
+        <h2 class="font-display font-bold text-3xl sm:text-4xl tracking-tight text-[#16231f] mb-4">
+          Tailored User Personas
+        </h2>
+        <p class="text-brand-muted text-lg">
+          Whether you are an administrator, a group leader, a congregant member, or a guest visitor — GraceManage provides tailored experiences for each persona.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Admin Persona Card -->
+        <div class="bg-white rounded-3xl p-6 border border-[#f0ede8] shadow-sm hover:shadow-xl transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl font-bold mb-4">🛡️</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-1">Administrator</h3>
+          <p class="text-xs text-purple-700 font-medium mb-3">Full Administrative Authority</p>
+          <p class="text-sm text-[#53635b] leading-relaxed mb-4">
+            Manages people, households, groups, services, attendance, and sensitive financial data (contributions, pledges, funds).
+          </p>
+          <a href="{{ route('login') }}" class="text-xs font-semibold text-brand hover:underline flex items-center gap-1">Admin Sign In →</a>
+        </div>
+
+        <!-- Group Leader Persona Card -->
+        <div class="bg-white rounded-3xl p-6 border border-[#f0ede8] shadow-sm hover:shadow-xl transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold mb-4">👥</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-1">Group Leader</h3>
+          <p class="text-xs text-emerald-700 font-medium mb-3">Ministry & Group Oversight</p>
+          <p class="text-sm text-[#53635b] leading-relaxed mb-4">
+            Manages assigned small groups, updates group rosters, schedules services, and tracks member attendance.
+          </p>
+          <a href="{{ route('login') }}" class="text-xs font-semibold text-brand hover:underline flex items-center gap-1">Leader Sign In →</a>
+        </div>
+
+        <!-- Member Persona Card -->
+        <div class="bg-white rounded-3xl p-6 border border-[#f0ede8] shadow-sm hover:shadow-xl transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold mb-4">👤</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-1">Church Member</h3>
+          <p class="text-xs text-blue-700 font-medium mb-3">Personal & Family Portal</p>
+          <p class="text-sm text-[#53635b] leading-relaxed mb-4">
+            Views member profile, family household, small group memberships, serving schedule, and personal attendance.
+          </p>
+          <a href="{{ route('login') }}" class="text-xs font-semibold text-brand hover:underline flex items-center gap-1">Member Portal →</a>
+        </div>
+
+        <!-- Guest Persona Card -->
+        <div class="bg-white rounded-3xl p-6 border border-[#f0ede8] shadow-sm hover:shadow-xl transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold mb-4">⛪</div>
+          <h3 class="font-bold text-lg text-gray-900 mb-1">Guest Visitor</h3>
+          <p class="text-xs text-amber-700 font-medium mb-3">Public Visitor Experience</p>
+          <p class="text-sm text-[#53635b] leading-relaxed mb-4">
+            Explores church welcome landing page, service schedule, vision, features, and simple member registration.
+          </p>
+          <a href="{{ route('register') }}" class="text-xs font-semibold text-brand hover:underline flex items-center gap-1">Register as Guest →</a>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= FEATURES GRID ================= -->
-    <section class="pb-20">
+    <section id="features" class="pb-20">
       <h2 class="font-display font-bold text-3xl sm:text-4xl tracking-tight text-[#16231f] mb-4">
         Everything your church needs
       </h2>
