@@ -20,6 +20,7 @@ use App\Livewire\Households\Index as HouseholdsIndex;
 use App\Livewire\Messages\Form as MessagesForm;
 use App\Livewire\Messages\Index as MessagesIndex;
 use App\Livewire\Messages\Show as MessagesShow;
+use App\Livewire\Members\Index as MembersIndex;
 use App\Livewire\People\Form as PeopleForm;
 use App\Livewire\People\Index as PeopleIndex;
 use App\Livewire\Pledges\Form as PledgesForm;
@@ -35,8 +36,13 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
+        if (auth()->user()->role === 'member') {
+            return redirect()->route('members.portal');
+        }
         return redirect()->route('people.index');
     })->name('dashboard');
+
+    Route::get('/member-portal', MembersIndex::class)->name('members.portal');
 
     Route::get('/people', PeopleIndex::class)->name('people.index');
     Route::get('/people/create', PeopleForm::class)->name('people.create');
