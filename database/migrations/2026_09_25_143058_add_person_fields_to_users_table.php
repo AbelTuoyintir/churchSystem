@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('person_id')->nullable()->after('id')
                 ->constrained('people')->nullOnDelete();
-            $table->string('role')->default('staff')->after('password'); // admin|staff|leader|viewer
+            $table->string('role')->default('member')->after('password'); // admin|staff|leader|viewer
         });
     }
 
