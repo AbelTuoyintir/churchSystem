@@ -3,6 +3,7 @@
 namespace App\Livewire\People;
 
 use App\Models\Person;
+use App\Services\CustomerPasswordService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,6 +16,12 @@ class Index extends Component
     public string $isActive = '';
     public bool $confirmingDeletion = false;
     public ?int $personIdBeingDeleted = null;
+
+    // Password generation properties
+    public bool $confirmingPasswordGeneration = false;
+    public ?int $personIdForPassword = null;
+    public string $passwordChannel = 'auto';
+    public ?string $generatedPasswordNotice = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -56,11 +63,33 @@ class Index extends Component
         session()->flash('success', 'Person deleted successfully.');
     }
 
+    public function confirmGeneratePassword(int $id): void
+    {
+        $this->personIdForPassword = $id;
+        $this->passwordChannel = 'auto';
+        $this->confirmingPasswordGeneration = true;
+    }
+
+    public function generatePassword(CustomerPasswordService $service): void
+    {
+        $person = Person::findOrFail($this->personIdForPassword);
+        $this->authorize('generatePassword', $person);
+
+        $result = $service->generateAndSendForPerson($person, $this->passwordChannel, auth()->user());
+
+        $this->confirmingPasswordGeneration = false;
+        $this->personIdForPassword = null;
+
+        $this->generatedPasswordNotice = "Password for {$person->full_name}: {$result['password']}";
+        session()->flash('success', $result['message']);
+    }
+
     public function render()
     {
         $this->authorize('viewAny', Person::class);
 
         $people = Person::query()
+            ->with('user')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('first_name', 'like', '%' . $this->search . '%')

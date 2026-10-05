@@ -4,6 +4,7 @@ namespace App\Livewire\People;
 
 use App\Models\Household;
 use App\Models\Person;
+use App\Services\CustomerPasswordService;
 use Livewire\Component;
 
 class Form extends Component
@@ -40,6 +41,11 @@ class Form extends Component
     public string $householdRole = 'other';
     public bool $confirmingHouseholdDetach = false;
     public ?int $householdIdToDetach = null;
+
+    // Password generation properties
+    public bool $confirmingPasswordGeneration = false;
+    public string $passwordChannel = 'auto';
+    public ?string $generatedPasswordNotice = null;
 
     public function mount(?Person $person = null): void
     {
@@ -132,6 +138,31 @@ class Form extends Component
         }
 
         return redirect()->route('people.index');
+    }
+
+    public function confirmGeneratePassword(): void
+    {
+        if (!$this->person || !$this->person->exists) {
+            return;
+        }
+
+        $this->passwordChannel = 'auto';
+        $this->confirmingPasswordGeneration = true;
+    }
+
+    public function generatePassword(CustomerPasswordService $service): void
+    {
+        if (!$this->person || !$this->person->exists) {
+            return;
+        }
+
+        $this->authorize('generatePassword', $this->person);
+
+        $result = $service->generateAndSendForPerson($this->person, $this->passwordChannel, auth()->user());
+
+        $this->confirmingPasswordGeneration = false;
+        $this->generatedPasswordNotice = "Password for {$this->person->full_name}: {$result['password']}";
+        session()->flash('password_success', $result['message']);
     }
 
     public function attachHousehold(): void
