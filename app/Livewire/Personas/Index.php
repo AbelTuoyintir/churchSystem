@@ -55,6 +55,7 @@ class Index extends Component
                 'membership_status' => 'member',
             ]);
             $user->person_id = $person->id;
+            $user->save();
         }
 
         if ($persona === 'admin') {
