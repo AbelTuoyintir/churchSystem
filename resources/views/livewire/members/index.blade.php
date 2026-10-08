@@ -1,4 +1,11 @@
 <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Session Flash Message -->
+    @if (session()->has('success'))
+        <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
+
     <!-- Welcome Header -->
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -9,8 +16,15 @@
                 Member Portal - View your profile, family household, group memberships, serving assignments, and attendance history.
             </p>
         </div>
-        <div class="inline-flex items-center px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-full capitalize">
-            Role: {{ $user->role }}
+        <div class="flex items-center gap-3">
+            <div class="inline-flex items-center px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-full capitalize">
+                Role: {{ $user->role }}
+            </div>
+            @if($person)
+                <button wire:click="openEditProfileModal" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md shadow-sm transition">
+                    Edit Contact Info
+                </button>
+            @endif
         </div>
     </div>
 
@@ -33,15 +47,20 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Profile Info Card -->
             <div class="lg:col-span-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
-                <div class="flex items-center space-x-4">
-                    <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 font-bold text-2xl flex items-center justify-center shrink-0">
-                        {{ strtoupper(substr($person->first_name, 0, 1) . substr($person->last_name, 0, 1)) }}
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900">{{ $person->full_name }}</h3>
-                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                            Status: {{ $person->membership_status }}
-                        </span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 font-bold text-2xl flex items-center justify-center shrink-0">
+                            {{ strtoupper(substr($person->first_name, 0, 1) . substr($person->last_name, 0, 1)) }}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">{{ $person->full_name }}</h3>
+                            @if($person->preferred_name)
+                                <p class="text-xs text-gray-500">("{{ $person->preferred_name }}")</p>
+                            @endif
+                            <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                                Status: {{ $person->membership_status }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -55,6 +74,9 @@
                     <div>
                         <span class="block text-xs font-semibold text-gray-500 uppercase">Phone</span>
                         <span class="text-gray-900">{{ $person->phone ?: 'N/A' }}</span>
+                        @if($person->alternate_phone)
+                            <span class="text-xs text-gray-500 block">Alt: {{ $person->alternate_phone }}</span>
+                        @endif
                     </div>
                     <div>
                         <span class="block text-xs font-semibold text-gray-500 uppercase">Address</span>
@@ -72,6 +94,23 @@
                         <span class="block text-xs font-semibold text-gray-500 uppercase">Date of Birth</span>
                         <span class="text-gray-900">{{ $person->date_of_birth ? $person->date_of_birth->format('M d, Y') : 'N/A' }}</span>
                     </div>
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-500 uppercase">Communication Preferences</span>
+                        <div class="flex gap-2 mt-1">
+                            <span class="px-2 py-0.5 text-xs rounded {{ $person->email_opt_in ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">
+                                Email: {{ $person->email_opt_in ? 'Subscribed' : 'Opted-out' }}
+                            </span>
+                            <span class="px-2 py-0.5 text-xs rounded {{ $person->sms_opt_in ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">
+                                SMS: {{ $person->sms_opt_in ? 'Subscribed' : 'Opted-out' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button wire:click="openEditProfileModal" class="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold rounded-md border border-gray-300 transition">
+                        Update Contact Information
+                    </button>
                 </div>
             </div>
 
@@ -210,6 +249,96 @@
                         </div>
                     @endif
                 </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Edit Profile Modal -->
+    @if ($editingProfile)
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4">
+            <div class="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900">Update Contact Details</h3>
+                    <button wire:click="closeEditProfileModal" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                </div>
+
+                <form wire:submit.prevent="updateProfile" class="space-y-4">
+                    <div>
+                        <label for="preferred_name" class="block text-sm font-medium text-gray-700">Preferred Name</label>
+                        <input type="text" id="preferred_name" wire:model="preferred_name" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2 border">
+                        @error('preferred_name') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                            <input type="text" id="phone" wire:model="phone" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2 border">
+                            @error('phone') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="alternate_phone" class="block text-sm font-medium text-gray-700">Alternate Phone</label>
+                            <input type="text" id="alternate_phone" wire:model="alternate_phone" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2 border">
+                            @error('alternate_phone') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="address_line1" class="block text-sm font-medium text-gray-700">Address Line 1</label>
+                        <input type="text" id="address_line1" wire:model="address_line1" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2 border">
+                        @error('address_line1') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label for="address_line2" class="block text-sm font-medium text-gray-700">Address Line 2</label>
+                        <input type="text" id="address_line2" wire:model="address_line2" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2 border">
+                        @error('address_line2') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label for="city" class="block text-xs font-medium text-gray-700">City</label>
+                            <input type="text" id="city" wire:model="city" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-2 py-1.5 border">
+                            @error('city') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="state" class="block text-xs font-medium text-gray-700">State</label>
+                            <input type="text" id="state" wire:model="state" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-2 py-1.5 border">
+                            @error('state') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="postal_code" class="block text-xs font-medium text-gray-700">Postal Code</label>
+                            <input type="text" id="postal_code" wire:model="postal_code" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-2 py-1.5 border">
+                            @error('postal_code') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2 border-t border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700">Communication Preferences</label>
+                        <div class="flex items-center space-x-6">
+                            <label class="inline-flex items-center text-xs text-gray-700">
+                                <input type="checkbox" wire:model="email_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-2">
+                                Receive Emails
+                            </label>
+
+                            <label class="inline-flex items-center text-xs text-gray-700">
+                                <input type="checkbox" wire:model="sms_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-2">
+                                Receive SMS
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                        <button type="button" wire:click="closeEditProfileModal" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

@@ -11,10 +11,54 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                <div class="hidden space-x-4 sm:-my-px sm:ms-6 sm:flex sm:items-center">
+                    @if(in_array(Auth::user()->role, ['admin', 'staff', 'leader', 'viewer']))
+                        <x-nav-link :href="route('people.index')" :active="request()->routeIs('people.*')">
+                            {{ __('People') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('households.index')" :active="request()->routeIs('households.*')">
+                            {{ __('Households') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.*')">
+                            {{ __('Groups') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">
+                            {{ __('Services') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
+                            {{ __('Attendance') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('messages.index')" :active="request()->routeIs('messages.*')">
+                            {{ __('Messages') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if(in_array(Auth::user()->role, ['admin', 'staff']))
+                        <div class="relative inline-flex items-center h-full pt-1 border-b-2 border-transparent hover:border-gray-300 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out">
+                            <x-dropdown align="left" width="48">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out {{ request()->routeIs(['funds.*', 'contributions.*', 'pledges.*']) ? 'text-indigo-600 font-semibold' : '' }}">
+                                        <span>{{ __('Giving') }}</span>
+                                        <svg class="ms-1 h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </x-slot>
+                                <x-slot name="content">
+                                    <x-dropdown-link :href="route('funds.index')">
+                                        {{ __('Funds') }}
+                                    </x-dropdown-link>
+                                    <x-dropdown-link :href="route('contributions.index')">
+                                        {{ __('Contributions') }}
+                                    </x-dropdown-link>
+                                    <x-dropdown-link :href="route('pledges.index')">
+                                        {{ __('Pledges') }}
+                                    </x-dropdown-link>
+                                </x-slot>
+                            </x-dropdown>
+                        </div>
+                    @endif
+
                     <x-nav-link :href="route('members.portal')" :active="request()->routeIs('members.portal')">
                         {{ __('My Portal') }}
                     </x-nav-link>
@@ -76,6 +120,43 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if(in_array(Auth::user()->role, ['admin', 'staff', 'leader', 'viewer']))
+                <x-responsive-nav-link :href="route('people.index')" :active="request()->routeIs('people.*')">
+                    {{ __('People') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('households.index')" :active="request()->routeIs('households.*')">
+                    {{ __('Households') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.*')">
+                    {{ __('Groups') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">
+                    {{ __('Services') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('attendances.index')" :active="request()->routeIs('attendances.*')">
+                    {{ __('Attendance') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('messages.index')" :active="request()->routeIs('messages.*')">
+                    {{ __('Messages') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if(in_array(Auth::user()->role, ['admin', 'staff']))
+                <div class="pt-2 pb-1 border-t border-gray-100">
+                    <div class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ __('Giving') }}</div>
+                    <x-responsive-nav-link :href="route('funds.index')" :active="request()->routeIs('funds.*')">
+                        {{ __('Funds') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('contributions.index')" :active="request()->routeIs('contributions.*')">
+                        {{ __('Contributions') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('pledges.index')" :active="request()->routeIs('pledges.*')">
+                        {{ __('Pledges') }}
+                    </x-responsive-nav-link>
+                </div>
+            @endif
+
             <x-responsive-nav-link :href="route('members.portal')" :active="request()->routeIs('members.portal')">
                 {{ __('My Portal') }}
             </x-responsive-nav-link>

@@ -89,3 +89,39 @@ test('dashboard redirects admin role to people index', function () {
         ->get('/dashboard')
         ->assertRedirect('/people');
 });
+
+test('member can edit own contact details from member portal', function () {
+    $person = Person::factory()->create([
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'phone' => '123-456-7890',
+        'address_line1' => '123 Main St',
+        'city' => 'Springfield',
+    ]);
+
+    $user = User::factory()->create([
+        'person_id' => $person->id,
+        'role' => 'member',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->call('openEditProfileModal')
+        ->assertSet('editingProfile', true)
+        ->assertSet('phone', '123-456-7890')
+        ->set('phone', '555-999-8888')
+        ->set('preferred_name', 'Janie')
+        ->set('address_line1', '456 Oak Ave')
+        ->set('city', 'Metropolis')
+        ->set('email_opt_in', true)
+        ->set('sms_opt_in', true)
+        ->call('updateProfile')
+        ->assertSet('editingProfile', false);
+
+    expect($person->fresh()->phone)->toBe('555-999-8888');
+    expect($person->fresh()->preferred_name)->toBe('Janie');
+    expect($person->fresh()->address_line1)->toBe('456 Oak Ave');
+    expect($person->fresh()->city)->toBe('Metropolis');
+    expect($person->fresh()->sms_opt_in)->toBeTrue();
+});
