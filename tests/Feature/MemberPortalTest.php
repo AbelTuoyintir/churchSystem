@@ -89,3 +89,34 @@ test('dashboard redirects admin role to people index', function () {
         ->get('/dashboard')
         ->assertRedirect('/people');
 });
+
+test('member can update their own profile contact details via member portal', function () {
+    $person = Person::factory()->create([
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'phone' => '111-222-3333',
+        'email' => 'jane@example.com',
+    ]);
+
+    $user = User::factory()->create([
+        'person_id' => $person->id,
+        'role' => 'member',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->call('editProfile')
+        ->set('phone', '555-999-0000')
+        ->set('address_line1', '123 New Grace Way')
+        ->set('city', 'Springfield')
+        ->set('state', 'IL')
+        ->set('postal_code', '62701')
+        ->call('updateProfile')
+        ->assertHasNoErrors();
+
+    expect($person->fresh())
+        ->phone->toBe('555-999-0000')
+        ->address_line1->toBe('123 New Grace Way')
+        ->city->toBe('Springfield');
+});
