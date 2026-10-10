@@ -90,13 +90,15 @@ test('dashboard redirects admin role to people index', function () {
         ->assertRedirect('/people');
 });
 
-test('member can edit own contact details from member portal', function () {
+test('member can edit contact information from member portal', function () {
     $person = Person::factory()->create([
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'phone' => '123-456-7890',
         'address_line1' => '123 Main St',
-        'city' => 'Springfield',
+        'city' => 'Old Town',
+        'state' => 'NY',
+        'postal_code' => '10001',
     ]);
 
     $user = User::factory()->create([
@@ -107,21 +109,33 @@ test('member can edit own contact details from member portal', function () {
     $this->actingAs($user);
 
     Livewire::test('members.index')
-        ->call('openEditProfileModal')
-        ->assertSet('editingProfile', true)
-        ->assertSet('phone', '123-456-7890')
         ->set('phone', '555-999-8888')
-        ->set('preferred_name', 'Janie')
-        ->set('address_line1', '456 Oak Ave')
-        ->set('city', 'Metropolis')
-        ->set('email_opt_in', true)
-        ->set('sms_opt_in', true)
+        ->set('address_line1', '456 New Hope Rd')
+        ->set('city', 'New City')
+        ->set('state', 'CA')
+        ->set('postal_code', '90210')
         ->call('updateProfile')
-        ->assertSet('editingProfile', false);
+        ->assertHasNoErrors()
+        ->assertSee('Your contact information has been updated successfully!');
 
-    expect($person->fresh()->phone)->toBe('555-999-8888');
-    expect($person->fresh()->preferred_name)->toBe('Janie');
-    expect($person->fresh()->address_line1)->toBe('456 Oak Ave');
-    expect($person->fresh()->city)->toBe('Metropolis');
-    expect($person->fresh()->sms_opt_in)->toBeTrue();
+    $person->refresh();
+    expect($person->phone)->toBe('555-999-8888')
+        ->and($person->address_line1)->toBe('456 New Hope Rd')
+        ->and($person->city)->toBe('New City')
+        ->and($person->state)->toBe('CA')
+        ->and($person->postal_code)->toBe('90210');
+});
+
+test('unlinked user cannot update profile in member portal', function () {
+    $user = User::factory()->create([
+        'person_id' => null,
+        'role' => 'member',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->set('phone', '555-000-1111')
+        ->call('updateProfile')
+        ->assertSee('No linked profile found.');
 });
