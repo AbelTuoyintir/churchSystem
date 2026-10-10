@@ -28,7 +28,11 @@ class PersonPolicy
 
     public function update(User $user, Person $person): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        if (in_array($user->role, ['admin', 'staff'])) {
+            return true;
+        }
+
+        return $user->person_id !== null && (int) $user->person_id === (int) $person->id;
     }
 
     public function delete(User $user, Person $person): bool
