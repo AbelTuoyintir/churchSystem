@@ -6,6 +6,12 @@
         </div>
     @endif
 
+    @if (session()->has('error'))
+        <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- Welcome Header -->
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -27,18 +33,6 @@
             @endif
         </div>
     </div>
-
-    @if (session()->has('success'))
-        <div class="p-4 bg-green-50 border-l-4 border-green-400 text-green-700 rounded shadow-sm text-sm font-medium">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div class="p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded shadow-sm text-sm font-medium">
-            {{ session('error') }}
-        </div>
-    @endif
 
     @if(!$person)
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
@@ -83,6 +77,12 @@
 
                 @if(!$isEditing)
                     <div class="space-y-3 text-sm text-gray-700">
+                        @if($person->preferred_name)
+                            <div>
+                                <span class="block text-xs font-semibold text-gray-500 uppercase">Preferred Name</span>
+                                <span class="text-gray-900">{{ $person->preferred_name }}</span>
+                            </div>
+                        @endif
                         <div>
                             <span class="block text-xs font-semibold text-gray-500 uppercase">Email</span>
                             <span class="text-gray-900">{{ $person->email ?: 'N/A' }}</span>
@@ -91,6 +91,12 @@
                             <span class="block text-xs font-semibold text-gray-500 uppercase">Phone</span>
                             <span class="text-gray-900">{{ $person->phone ?: 'N/A' }}</span>
                         </div>
+                        @if($person->alternate_phone)
+                            <div>
+                                <span class="block text-xs font-semibold text-gray-500 uppercase">Alt Phone</span>
+                                <span class="text-gray-900">{{ $person->alternate_phone }}</span>
+                            </div>
+                        @endif
                         <div>
                             <span class="block text-xs font-semibold text-gray-500 uppercase">Address</span>
                             <span class="text-gray-900">
@@ -107,13 +113,31 @@
                             <span class="block text-xs font-semibold text-gray-500 uppercase">Date of Birth</span>
                             <span class="text-gray-900">{{ $person->date_of_birth ? $person->date_of_birth->format('M d, Y') : 'N/A' }}</span>
                         </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Communication Preferences</span>
+                            <span class="text-gray-900 text-xs">
+                                Email: {{ $person->email_opt_in ? 'Subscribed' : 'Opted Out' }} | SMS: {{ $person->sms_opt_in ? 'Subscribed' : 'Opted Out' }}
+                            </span>
+                        </div>
                     </div>
                 @else
                     <form wire:submit.prevent="updateProfile" class="space-y-3 text-sm">
                         <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Preferred Name</label>
+                            <input type="text" wire:model="preferred_name" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('preferred_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
                             <label class="block text-xs font-semibold text-gray-600 uppercase">Phone</label>
                             <input type="text" wire:model="phone" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             @error('phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Alternate Phone</label>
+                            <input type="text" wire:model="alternate_phone" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('alternate_phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
@@ -151,6 +175,20 @@
                             <label class="block text-xs font-semibold text-gray-600 uppercase">Date of Birth</label>
                             <input type="date" wire:model="date_of_birth" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             @error('date_of_birth') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="space-y-1 pt-2">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Communication Preferences</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="inline-flex items-center text-xs text-gray-700">
+                                    <input type="checkbox" wire:model="email_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-1.5">
+                                    Receive Emails
+                                </label>
+                                <label class="inline-flex items-center text-xs text-gray-700">
+                                    <input type="checkbox" wire:model="sms_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-1.5">
+                                    Receive SMS
+                                </label>
+                            </div>
                         </div>
 
                         <div class="pt-2 flex items-center gap-2">
