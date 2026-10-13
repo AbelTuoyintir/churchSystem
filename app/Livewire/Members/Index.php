@@ -86,16 +86,6 @@ class Index extends Component
         $this->isEditing = false;
     }
 
-    public function openEditProfileModal(): void
-    {
-        $this->editingProfile = true;
-    }
-
-    public function closeEditProfileModal(): void
-    {
-        $this->editingProfile = false;
-    }
-
     public function updateProfile(): void
     {
         $user = auth()->user();
