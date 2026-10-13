@@ -174,6 +174,17 @@
                     Ministry and group leadership access. Group leaders can edit their assigned group, manage small group rosters, track service attendance, and send group messages.
                 </p>
 
+                @if($ledGroups->isNotEmpty())
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-900">
+                        <span class="font-bold block mb-1">Led Groups ({{ $ledGroupCount }}):</span>
+                        <ul class="list-disc list-inside space-y-0.5">
+                            @foreach($ledGroups as $ledGroup)
+                                <li>{{ $ledGroup->name }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="space-y-2 pt-2">
                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Key Capabilities & Access</h4>
                     <ul class="text-xs text-gray-700 space-y-1.5">
