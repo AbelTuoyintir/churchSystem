@@ -78,6 +78,11 @@ test('leader of a group persona can manage led group but cannot access financial
 
     $this->actingAs($leader);
 
+    Livewire::test('personas.index')
+        ->assertStatus(200)
+        ->assertSee('Bob Small Group')
+        ->assertSee('Led Groups (1):');
+
     $this->get('/groups')->assertStatus(200)->assertSee('Bob Small Group');
     $this->get("/groups/{$group->id}/edit")->assertStatus(200);
 

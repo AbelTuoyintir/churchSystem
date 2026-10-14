@@ -96,14 +96,17 @@ class Index extends Component
     {
         $currentUser = Auth::user();
         $ledGroupCount = 0;
+        $ledGroups = collect();
 
         if ($currentUser && $currentUser->person_id) {
-            $ledGroupCount = Group::where('leader_id', $currentUser->person_id)->count();
+            $ledGroups = Group::where('leader_id', $currentUser->person_id)->get();
+            $ledGroupCount = $ledGroups->count();
         }
 
         return view('livewire.personas.index', [
             'currentUser' => $currentUser,
             'ledGroupCount' => $ledGroupCount,
+            'ledGroups' => $ledGroups,
         ])->layout('layouts.app', ['header' => 'User Personas']);
     }
 }
