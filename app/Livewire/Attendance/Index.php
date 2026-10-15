@@ -16,26 +16,39 @@ class Index extends Component
 
     // Table filters
     public string $dateFrom = '';
+
     public string $dateTo = '';
+
     public string $serviceId = '';
+
     public string $groupId = '';
+
     public string $statusFilter = '';
 
     // Bulk action selected row IDs
     public array $selectedAttendanceIds = [];
+
     public bool $selectAll = false;
 
     // Modal form properties
     public bool $showingFormModal = false;
+
     public ?int $editingAttendanceId = null;
 
     public ?int $person_id = null;
+
     public ?int $service_id = null;
+
     public ?int $event_id = null;
+
     public ?int $group_id = null;
+
     public string $attended_on = '';
+
     public string $status = 'present';
+
     public ?int $headcount = null;
+
     public string $notes = '';
 
     // Search input for person selector in modal form
@@ -43,6 +56,7 @@ class Index extends Component
 
     // Confirmation modal for deletion
     public bool $confirmingDeletion = false;
+
     public ?int $attendanceIdBeingDeleted = null;
 
     protected $queryString = [
@@ -86,7 +100,7 @@ class Index extends Component
     public function updatedSelectAll($value): void
     {
         if ($value) {
-            $this->selectedAttendanceIds = $this->getFilteredAttendancesQuery()->pluck('id')->map(fn($id) => (string) $id)->toArray();
+            $this->selectedAttendanceIds = $this->getFilteredAttendancesQuery()->pluck('id')->map(fn ($id) => (string) $id)->toArray();
         } else {
             $this->selectedAttendanceIds = [];
         }
@@ -202,7 +216,7 @@ class Index extends Component
             return;
         }
 
-        if (!in_array($status, ['present', 'absent'])) {
+        if (! in_array($status, ['present', 'absent'])) {
             return;
         }
 
@@ -238,15 +252,15 @@ class Index extends Component
     public function resolveContext(Attendance $attendance): string
     {
         if ($attendance->service) {
-            return 'Service: ' . $attendance->service->name;
+            return 'Service: '.$attendance->service->name;
         }
 
         if ($attendance->event) {
-            return 'Event: ' . $attendance->event->title;
+            return 'Event: '.$attendance->event->title;
         }
 
         if ($attendance->group) {
-            return 'Group: ' . $attendance->group->name;
+            return 'Group: '.$attendance->group->name;
         }
 
         return '—';
@@ -255,11 +269,11 @@ class Index extends Component
     private function getFilteredAttendancesQuery()
     {
         return Attendance::query()
-            ->when($this->dateFrom !== '', fn($q) => $q->where('attended_on', '>=', $this->dateFrom))
-            ->when($this->dateTo !== '', fn($q) => $q->where('attended_on', '<=', $this->dateTo))
-            ->when($this->serviceId !== '', fn($q) => $q->where('service_id', $this->serviceId))
-            ->when($this->groupId !== '', fn($q) => $q->where('group_id', $this->groupId))
-            ->when($this->statusFilter !== '', fn($q) => $q->where('status', $this->statusFilter));
+            ->when($this->dateFrom !== '', fn ($q) => $q->where('attended_on', '>=', $this->dateFrom))
+            ->when($this->dateTo !== '', fn ($q) => $q->where('attended_on', '<=', $this->dateTo))
+            ->when($this->serviceId !== '', fn ($q) => $q->where('service_id', $this->serviceId))
+            ->when($this->groupId !== '', fn ($q) => $q->where('group_id', $this->groupId))
+            ->when($this->statusFilter !== '', fn ($q) => $q->where('status', $this->statusFilter));
     }
 
     public function render()
@@ -275,8 +289,8 @@ class Index extends Component
         $peopleQuery = Person::query()->orderBy('last_name')->orderBy('first_name');
         if ($this->personSearch !== '') {
             $peopleQuery->where(function ($q) {
-                $q->where('first_name', 'like', '%' . $this->personSearch . '%')
-                    ->orWhere('last_name', 'like', '%' . $this->personSearch . '%');
+                $q->where('first_name', 'like', '%'.$this->personSearch.'%')
+                    ->orWhere('last_name', 'like', '%'.$this->personSearch.'%');
             });
         }
         $people = $peopleQuery->limit(50)->get();

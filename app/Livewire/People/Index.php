@@ -12,15 +12,22 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $membershipStatus = '';
+
     public string $isActive = '';
+
     public bool $confirmingDeletion = false;
+
     public ?int $personIdBeingDeleted = null;
 
     // Password generation properties
     public bool $confirmingPasswordGeneration = false;
+
     public ?int $personIdForPassword = null;
+
     public string $passwordChannel = 'auto';
+
     public ?string $generatedPasswordNotice = null;
 
     protected $queryString = [
@@ -92,10 +99,10 @@ class Index extends Component
             ->with('user')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%')
-                        ->orWhere('phone', 'like', '%' . $this->search . '%');
+                    $q->where('first_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('phone', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->membershipStatus !== '', function ($query) {

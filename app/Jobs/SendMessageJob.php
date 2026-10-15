@@ -40,27 +40,27 @@ class SendMessageJob implements ShouldQueue
                 ->where('phone', '!=', '');
         }
 
-        if (!empty($filter['membership_status'])) {
+        if (! empty($filter['membership_status'])) {
             $query->where('membership_status', $filter['membership_status']);
         }
 
-        if (!empty($filter['group_id'])) {
+        if (! empty($filter['group_id'])) {
             $query->whereHas('groups', function ($q) use ($filter) {
                 $q->where('groups.id', $filter['group_id']);
             });
         }
 
-        if (!empty($filter['team_id'])) {
+        if (! empty($filter['team_id'])) {
             $query->whereHas('teamMemberships', function ($q) use ($filter) {
                 $q->where('team_id', $filter['team_id']);
             });
         }
 
-        if (!empty($filter['email_opt_in'])) {
+        if (! empty($filter['email_opt_in'])) {
             $query->where('email_opt_in', true);
         }
 
-        if (!empty($filter['sms_opt_in'])) {
+        if (! empty($filter['sms_opt_in'])) {
             $query->where('sms_opt_in', true);
         }
 
@@ -68,7 +68,7 @@ class SendMessageJob implements ShouldQueue
 
         foreach ($people as $person) {
             $address = $this->message->channel === 'email' ? $person->email : $person->phone;
-            if (!$address) {
+            if (! $address) {
                 continue;
             }
 

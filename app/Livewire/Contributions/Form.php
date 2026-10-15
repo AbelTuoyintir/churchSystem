@@ -12,12 +12,19 @@ class Form extends Component
     public ?Contribution $contribution = null;
 
     public ?int $person_id = null;
+
     public ?int $fund_id = null;
+
     public string $amount = '';
+
     public string $contributed_on = '';
+
     public string $method = 'cash';
+
     public string $reference = '';
+
     public bool $is_anonymous = false;
+
     public string $note = '';
 
     public string $personSearch = '';
@@ -38,7 +45,7 @@ class Form extends Component
             $this->note = $contribution->note ?? '';
         } else {
             $this->authorize('create', Contribution::class);
-            $this->contribution = new Contribution();
+            $this->contribution = new Contribution;
             $this->contributed_on = now()->format('Y-m-d');
 
             // Default to first active fund if available
@@ -104,8 +111,8 @@ class Form extends Component
         $peopleQuery = Person::query()->orderBy('last_name')->orderBy('first_name');
         if ($this->personSearch !== '') {
             $peopleQuery->where(function ($q) {
-                $q->where('first_name', 'like', '%' . $this->personSearch . '%')
-                  ->orWhere('last_name', 'like', '%' . $this->personSearch . '%');
+                $q->where('first_name', 'like', '%'.$this->personSearch.'%')
+                    ->orWhere('last_name', 'like', '%'.$this->personSearch.'%');
             });
         }
         $people = $peopleQuery->limit(50)->get();
