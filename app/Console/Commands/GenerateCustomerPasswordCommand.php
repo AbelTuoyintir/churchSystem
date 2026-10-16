@@ -33,8 +33,9 @@ class GenerateCustomerPasswordCommand extends Command
         $identifier = $this->argument('identifier');
         $channel = strtolower($this->option('channel') ?? 'auto');
 
-        if (!in_array($channel, ['auto', 'email', 'sms', 'both'])) {
+        if (! in_array($channel, ['auto', 'email', 'sms', 'both'])) {
             $this->error("Invalid channel option '{$channel}'. Allowed: auto, email, sms, both.");
+
             return Command::FAILURE;
         }
 
@@ -44,34 +45,35 @@ class GenerateCustomerPasswordCommand extends Command
 
         if (is_numeric($identifier)) {
             $user = User::find($identifier);
-            if (!$user) {
+            if (! $user) {
                 $person = Person::find($identifier);
             }
         }
 
         // 2. Check by email
-        if (!$user && !$person && filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+        if (! $user && ! $person && filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
             $user = User::where('email', $identifier)->first();
-            if (!$user) {
+            if (! $user) {
                 $person = Person::where('email', $identifier)->first();
             }
         }
 
         // 3. Check by phone or string email/name
-        if (!$user && !$person) {
+        if (! $user && ! $person) {
             $person = Person::where('phone', $identifier)
                 ->orWhere('email', $identifier)
                 ->orWhere('first_name', 'like', "%{$identifier}%")
                 ->orWhere('last_name', 'like', "%{$identifier}%")
                 ->first();
 
-            if (!$person) {
+            if (! $person) {
                 $user = User::where('email', $identifier)->first();
             }
         }
 
-        if (!$user && !$person) {
+        if (! $user && ! $person) {
             $this->error("No customer, user, or person found matching '{$identifier}'.");
+
             return Command::FAILURE;
         }
 
@@ -81,13 +83,13 @@ class GenerateCustomerPasswordCommand extends Command
             $result = $service->generateAndSendForUser($user, $channel);
         }
 
-        $this->info("----------------------------------------");
-        $this->info("Customer Password Successfully Generated");
-        $this->info("----------------------------------------");
-        $this->line("Customer/User Name: " . ($result['person'] ? $result['person']->full_name : $result['user']->name));
-        $this->line("Email:             " . $result['user']->email);
-        $this->line("Generated Password: " . $result['password']);
-        $this->line("Channels Sent:      " . implode(', ', $result['sent_channels'] ?: ['None']));
+        $this->info('----------------------------------------');
+        $this->info('Customer Password Successfully Generated');
+        $this->info('----------------------------------------');
+        $this->line('Customer/User Name: '.($result['person'] ? $result['person']->full_name : $result['user']->name));
+        $this->line('Email:             '.$result['user']->email);
+        $this->line('Generated Password: '.$result['password']);
+        $this->line('Channels Sent:      '.implode(', ', $result['sent_channels'] ?: ['None']));
         $this->info($result['message']);
 
         return Command::SUCCESS;

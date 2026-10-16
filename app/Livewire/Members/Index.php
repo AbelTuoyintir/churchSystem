@@ -8,18 +8,29 @@ use Livewire\Component;
 class Index extends Component
 {
     public bool $isEditing = false;
+
     public bool $editingProfile = false;
 
     public ?string $preferred_name = null;
+
     public ?string $phone = null;
+
     public ?string $alternate_phone = null;
+
     public ?string $address_line1 = null;
+
     public ?string $address_line2 = null;
+
     public ?string $city = null;
+
     public ?string $state = null;
+
     public ?string $postal_code = null;
+
     public ?string $date_of_birth = null;
+
     public bool $email_opt_in = true;
+
     public bool $sms_opt_in = true;
 
     protected function rules(): array
@@ -67,7 +78,7 @@ class Index extends Component
 
     public function toggleEdit(): void
     {
-        $this->isEditing = !$this->isEditing;
+        $this->isEditing = ! $this->isEditing;
         if ($this->isEditing) {
             $this->loadPersonData();
         }
@@ -90,15 +101,17 @@ class Index extends Component
     {
         $user = auth()->user();
 
-        if (!$user || !$user->person_id) {
+        if (! $user || ! $user->person_id) {
             session()->flash('error', 'No linked profile found.');
+
             return;
         }
 
         $person = Person::find($user->person_id);
 
-        if (!$person) {
+        if (! $person) {
             session()->flash('error', 'Person profile not found.');
+
             return;
         }
 

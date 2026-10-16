@@ -2,8 +2,6 @@
 
 use App\Livewire\People\Form;
 use App\Livewire\People\Index;
-use App\Models\Message;
-use App\Models\MessageRecipient;
 use App\Models\Person;
 use App\Models\User;
 use App\Services\CustomerPasswordService;
@@ -80,8 +78,8 @@ test('artisan command customer:generate-password generates password by email or 
         'identifier' => 'cmd.test@example.com',
         '--channel' => 'email',
     ])
-    ->expectsOutputToContain('Customer Password Successfully Generated')
-    ->assertExitCode(0);
+        ->expectsOutputToContain('Customer Password Successfully Generated')
+        ->assertExitCode(0);
 
     $user = User::where('email', 'cmd.test@example.com')->first();
     expect($user)->not->toBeNull();

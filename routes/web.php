@@ -17,13 +17,13 @@ use App\Livewire\Groups\Form as GroupsForm;
 use App\Livewire\Groups\Index as GroupsIndex;
 use App\Livewire\Households\Form as HouseholdsForm;
 use App\Livewire\Households\Index as HouseholdsIndex;
+use App\Livewire\Members\Index as MembersIndex;
 use App\Livewire\Messages\Form as MessagesForm;
 use App\Livewire\Messages\Index as MessagesIndex;
 use App\Livewire\Messages\Show as MessagesShow;
-use App\Livewire\Members\Index as MembersIndex;
 use App\Livewire\People\Form as PeopleForm;
-use App\Livewire\Personas\Index as PersonasIndex;
 use App\Livewire\People\Index as PeopleIndex;
+use App\Livewire\Personas\Index as PersonasIndex;
 use App\Livewire\Pledges\Form as PledgesForm;
 use App\Livewire\Pledges\Index as PledgesIndex;
 use App\Livewire\Services\Form as ServicesForm;
@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
         if (auth()->user()->role === 'member') {
             return redirect()->route('members.portal');
         }
+
         return redirect()->route('people.index');
     })->name('dashboard');
 

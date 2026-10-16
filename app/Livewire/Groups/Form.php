@@ -5,6 +5,7 @@ namespace App\Livewire\Groups;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\Person;
+use Illuminate\Support\Carbon;
 use Livewire\Component;
 
 class Form extends Component
@@ -12,12 +13,19 @@ class Form extends Component
     public ?Group $group = null;
 
     public string $name = '';
+
     public string $description = '';
+
     public string $type = 'small_group';
+
     public ?int $leader_id = null;
+
     public string $meeting_day = '';
+
     public string $meeting_time = '';
+
     public string $location = '';
+
     public bool $is_active = true;
 
     // Leader search property
@@ -25,9 +33,13 @@ class Form extends Component
 
     // Member attachment properties
     public ?int $selectedPersonId = null;
+
     public string $memberRole = 'member';
+
     public string $joinedAt = '';
+
     public bool $confirmingMemberDetach = false;
+
     public ?int $groupMemberIdToDetach = null;
 
     public function mount(?Group $group = null): void
@@ -43,12 +55,12 @@ class Form extends Component
             $this->type = $group->type ?? 'small_group';
             $this->leader_id = $group->leader_id;
             $this->meeting_day = $group->meeting_day ?? '';
-            $this->meeting_time = $group->meeting_time ? \Illuminate\Support\Carbon::parse($group->meeting_time)->format('H:i') : '';
+            $this->meeting_time = $group->meeting_time ? Carbon::parse($group->meeting_time)->format('H:i') : '';
             $this->location = $group->location ?? '';
             $this->is_active = (bool) ($group->is_active ?? true);
         } else {
             $this->authorize('create', Group::class);
-            $this->group = new Group();
+            $this->group = new Group;
         }
     }
 
@@ -92,7 +104,7 @@ class Form extends Component
 
     public function attachMember(): void
     {
-        if (!$this->group || !$this->group->exists) {
+        if (! $this->group || ! $this->group->exists) {
             return;
         }
 
@@ -126,7 +138,7 @@ class Form extends Component
 
     public function detachMember(): void
     {
-        if (!$this->group || !$this->group->exists) {
+        if (! $this->group || ! $this->group->exists) {
             return;
         }
 
@@ -156,8 +168,8 @@ class Form extends Component
 
         if ($this->leaderSearch !== '') {
             $peopleQuery->where(function ($q) {
-                $q->where('first_name', 'like', '%' . $this->leaderSearch . '%')
-                    ->orWhere('last_name', 'like', '%' . $this->leaderSearch . '%');
+                $q->where('first_name', 'like', '%'.$this->leaderSearch.'%')
+                    ->orWhere('last_name', 'like', '%'.$this->leaderSearch.'%');
             });
         }
 
