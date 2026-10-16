@@ -94,7 +94,7 @@ test('admin and staff can access index, create, and update for contributions', f
 });
 
 test('contribution policy denies leader and viewer on all abilities', function () {
-    $policy = new ContributionPolicy();
+    $policy = new ContributionPolicy;
     $leader = User::factory()->create(['role' => 'leader']);
     $viewer = User::factory()->create(['role' => 'viewer']);
     $fund = Fund::create(['name' => 'General Fund']);

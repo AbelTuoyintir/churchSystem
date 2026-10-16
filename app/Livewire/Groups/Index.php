@@ -11,9 +11,13 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $type = '';
+
     public string $isActive = '';
+
     public bool $confirmingInactivation = false;
+
     public ?int $groupIdBeingInactivated = null;
 
     protected $queryString = [
@@ -64,7 +68,7 @@ class Index extends Component
             ->with('leader')
             ->withCount('members')
             ->when($this->search !== '', function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%');
             })
             ->when($this->type !== '', function ($query) {
                 $query->where('type', $this->type);

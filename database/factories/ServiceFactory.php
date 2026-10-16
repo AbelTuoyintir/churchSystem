@@ -15,7 +15,7 @@ class ServiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->words(3, true) . ' Service',
+            'name' => $this->faker->words(3, true).' Service',
             'day_of_week' => $this->faker->numberBetween(0, 6),
             'start_time' => '09:00:00',
             'location' => $this->faker->streetAddress(),

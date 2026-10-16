@@ -86,7 +86,7 @@ class PersonController extends Controller
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['sometimes', 'string', 'max:255'],
             'preferred_name' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255', 'unique:people,email,' . $person->id],
+            'email' => ['nullable', 'email', 'max:255', 'unique:people,email,'.$person->id],
             'phone' => ['nullable', 'string', 'max:255'],
             'alternate_phone' => ['nullable', 'string', 'max:255'],
             'date_of_birth' => ['nullable', 'date'],

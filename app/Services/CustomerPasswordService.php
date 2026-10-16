@@ -27,8 +27,8 @@ class CustomerPasswordService
     {
         $user = $person->user;
 
-        if (!$user) {
-            $email = $person->email ?: strtolower($person->first_name . '.' . $person->last_name . '@example.com');
+        if (! $user) {
+            $email = $person->email ?: strtolower($person->first_name.'.'.$person->last_name.'@example.com');
             $user = User::create([
                 'name' => $person->full_name,
                 'email' => $email,
@@ -52,7 +52,7 @@ class CustomerPasswordService
         $user->save();
 
         $person = $user->person;
-        if (!$person) {
+        if (! $person) {
             // Find person by email or phone if unlinked
             $person = Person::where('email', $user->email)->first();
             if ($person) {
@@ -66,16 +66,16 @@ class CustomerPasswordService
 
         $sentChannels = [];
 
-        $shouldSendEmail = ($channel === 'email' || $channel === 'both' || ($channel === 'auto' && !empty($email)));
-        $shouldSendSms = ($channel === 'sms' || $channel === 'both' || ($channel === 'auto' && empty($email) && !empty($phone)));
+        $shouldSendEmail = ($channel === 'email' || $channel === 'both' || ($channel === 'auto' && ! empty($email)));
+        $shouldSendSms = ($channel === 'sms' || $channel === 'both' || ($channel === 'auto' && empty($email) && ! empty($phone)));
 
-        if ($shouldSendEmail && !empty($email)) {
+        if ($shouldSendEmail && ! empty($email)) {
             $emailSubject = 'Your Account Login Password';
-            $emailBody = "Hello " . ($person ? $person->first_name : $user->name) . ",\n\n" .
-                "Your login password has been set/reset.\n\n" .
-                "Username / Email: {$user->email}\n" .
-                "Password: {$plainPassword}\n\n" .
-                "Please log in and update your password when possible.";
+            $emailBody = 'Hello '.($person ? $person->first_name : $user->name).",\n\n".
+                "Your login password has been set/reset.\n\n".
+                "Username / Email: {$user->email}\n".
+                "Password: {$plainPassword}\n\n".
+                'Please log in and update your password when possible.';
 
             try {
                 Mail::raw($emailBody, function ($message) use ($email, $emailSubject) {
@@ -111,9 +111,9 @@ class CustomerPasswordService
             $sentChannels[] = 'email';
         }
 
-        if ($shouldSendSms && !empty($phone)) {
+        if ($shouldSendSms && ! empty($phone)) {
             $smsSubject = 'Your Account Password';
-            $smsBody = "Hello " . ($person ? $person->first_name : $user->name) . ", your login password is: {$plainPassword}";
+            $smsBody = 'Hello '.($person ? $person->first_name : $user->name).", your login password is: {$plainPassword}";
 
             $msgRecord = Message::create([
                 'subject' => $smsSubject,
@@ -141,7 +141,7 @@ class CustomerPasswordService
             $sentChannels[] = 'sms';
         }
 
-        $channelText = !empty($sentChannels) ? implode(' and ', $sentChannels) : 'no delivery channel (no email/phone found)';
+        $channelText = ! empty($sentChannels) ? implode(' and ', $sentChannels) : 'no delivery channel (no email/phone found)';
 
         return [
             'success' => true,

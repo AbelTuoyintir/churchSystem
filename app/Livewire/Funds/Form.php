@@ -10,9 +10,13 @@ class Form extends Component
     public ?Fund $fund = null;
 
     public string $name = '';
+
     public string $description = '';
+
     public bool $is_tax_deductible = true;
+
     public ?string $goal_amount = null;
+
     public bool $is_active = true;
 
     public function mount(?Fund $fund = null): void
@@ -28,7 +32,7 @@ class Form extends Component
             $this->is_active = (bool) ($fund->is_active ?? true);
         } else {
             $this->authorize('create', Fund::class);
-            $this->fund = new Fund();
+            $this->fund = new Fund;
         }
     }
 

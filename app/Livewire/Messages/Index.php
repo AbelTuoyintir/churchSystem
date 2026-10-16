@@ -12,8 +12,11 @@ class Index extends Component
     use WithPagination;
 
     public string $channel = '';
+
     public string $status = '';
+
     public bool $confirmingSend = false;
+
     public ?int $messageIdBeingSent = null;
 
     protected $queryString = [
@@ -43,7 +46,7 @@ class Index extends Component
     public function sendNow(?int $id = null): void
     {
         $messageId = $id ?? $this->messageIdBeingSent;
-        if (!$messageId) {
+        if (! $messageId) {
             return;
         }
 
@@ -67,7 +70,7 @@ class Index extends Component
         $original = Message::findOrFail($id);
 
         $duplicate = Message::create([
-            'subject' => $original->subject ? 'Copy of ' . $original->subject : 'Copy of Message',
+            'subject' => $original->subject ? 'Copy of '.$original->subject : 'Copy of Message',
             'body' => $original->body,
             'channel' => $original->channel,
             'status' => 'draft',
@@ -87,8 +90,8 @@ class Index extends Component
 
         $messages = Message::query()
             ->withCount('recipients')
-            ->when($this->channel !== '', fn($q) => $q->where('channel', $this->channel))
-            ->when($this->status !== '', fn($q) => $q->where('status', $this->status))
+            ->when($this->channel !== '', fn ($q) => $q->where('channel', $this->channel))
+            ->when($this->status !== '', fn ($q) => $q->where('status', $this->status))
             ->latest()
             ->paginate(15);
 

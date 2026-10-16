@@ -2,6 +2,15 @@
 
 namespace App\Providers;
 
+use App\Contracts\MessageSender;
+use App\Models\Household;
+use App\Models\Message;
+use App\Models\Person;
+use App\Policies\HouseholdPolicy;
+use App\Policies\MessagePolicy;
+use App\Policies\PersonPolicy;
+use App\Services\NullMessageSender;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(\App\Contracts\MessageSender::class, \App\Services\NullMessageSender::class);
+        $this->app->bind(MessageSender::class, NullMessageSender::class);
     }
 
     /**
@@ -19,8 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Gate::policy(\App\Models\Person::class, \App\Policies\PersonPolicy::class);
-        \Illuminate\Support\Facades\Gate::policy(\App\Models\Household::class, \App\Policies\HouseholdPolicy::class);
-        \Illuminate\Support\Facades\Gate::policy(\App\Models\Message::class, \App\Policies\MessagePolicy::class);
+        Gate::policy(Person::class, PersonPolicy::class);
+        Gate::policy(Household::class, HouseholdPolicy::class);
+        Gate::policy(Message::class, MessagePolicy::class);
     }
 }

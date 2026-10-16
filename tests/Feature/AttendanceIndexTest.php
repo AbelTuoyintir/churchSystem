@@ -2,7 +2,6 @@
 
 use App\Livewire\Attendance\Index as AttendanceIndex;
 use App\Models\Attendance;
-use App\Models\Event;
 use App\Models\Group;
 use App\Models\Person;
 use App\Models\Service;

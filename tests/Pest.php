@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
 uses(
-    Tests\TestCase::class,
-    Illuminate\Foundation\Testing\RefreshDatabase::class,
-)->in(__DIR__ . '/Feature');
+    TestCase::class,
+    RefreshDatabase::class,
+)->in(__DIR__.'/Feature');

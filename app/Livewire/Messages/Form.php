@@ -13,15 +13,22 @@ class Form extends Component
     public ?Message $message = null;
 
     public string $subject = '';
+
     public string $body = '';
+
     public string $channel = 'email';
+
     public ?string $scheduled_at = null;
 
     // Audience filter properties
     public string $membership_status = '';
+
     public string $group_id = '';
+
     public string $team_id = '';
+
     public bool $email_opt_in = false;
+
     public bool $sms_opt_in = false;
 
     public function mount(?Message $message = null): void
@@ -39,11 +46,11 @@ class Form extends Component
             $this->membership_status = $filter['membership_status'] ?? '';
             $this->group_id = isset($filter['group_id']) ? (string) $filter['group_id'] : '';
             $this->team_id = isset($filter['team_id']) ? (string) $filter['team_id'] : '';
-            $this->email_opt_in = !empty($filter['email_opt_in']);
-            $this->sms_opt_in = !empty($filter['sms_opt_in']);
+            $this->email_opt_in = ! empty($filter['email_opt_in']);
+            $this->sms_opt_in = ! empty($filter['sms_opt_in']);
         } else {
             $this->authorize('create', Message::class);
-            $this->message = new Message();
+            $this->message = new Message;
         }
     }
 
@@ -122,7 +129,7 @@ class Form extends Component
         ];
 
         $status = 'draft';
-        if (!empty($this->scheduled_at) && strtotime($this->scheduled_at) > time()) {
+        if (! empty($this->scheduled_at) && strtotime($this->scheduled_at) > time()) {
             $status = 'scheduled';
         }
 

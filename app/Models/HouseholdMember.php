@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class HouseholdMember extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'household_id',
         'person_id',

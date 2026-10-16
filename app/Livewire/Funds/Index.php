@@ -11,6 +11,7 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $isActive = '';
 
     protected $queryString = [
@@ -36,8 +37,8 @@ class Index extends Component
             ->withSum('contributions', 'amount')
             ->when($this->search !== '', function ($query) {
                 $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('description', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->isActive !== '', function ($query) {

@@ -12,7 +12,9 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $fund_id = '';
+
     public string $frequency = '';
 
     protected $queryString = [
@@ -44,8 +46,8 @@ class Index extends Component
             ->with(['person', 'fund'])
             ->when($this->search !== '', function ($query) {
                 $query->whereHas('person', function ($pq) {
-                    $pq->where('first_name', 'like', '%' . $this->search . '%')
-                       ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                    $pq->where('first_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('last_name', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->fund_id !== '', function ($query) {

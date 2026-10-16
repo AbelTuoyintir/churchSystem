@@ -1,15 +1,13 @@
 <?php
 
+use App\Contracts\MessageSender;
 use App\Jobs\SendMessageJob;
 use App\Livewire\Messages\Form as MessagesForm;
 use App\Livewire\Messages\Index as MessagesIndex;
 use App\Livewire\Messages\Show as MessagesShow;
-use App\Models\Group;
 use App\Models\Message;
 use App\Models\MessageRecipient;
 use App\Models\Person;
-use App\Models\Team;
-use App\Models\TeamMember;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -152,7 +150,7 @@ test('SendMessageJob processes message recipients and updates status', function 
     ]);
 
     $job = new SendMessageJob($message);
-    $job->handle(app(\App\Contracts\MessageSender::class));
+    $job->handle(app(MessageSender::class));
 
     $this->assertEquals('sent', $message->fresh()->status);
     $this->assertNotNull($message->fresh()->sent_at);
