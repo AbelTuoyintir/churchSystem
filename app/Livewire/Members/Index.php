@@ -139,6 +139,8 @@ class Index extends Component
                     'assignments.position',
                     'assignments.service',
                     'attendances.service',
+                    'contributions.fund',
+                    'pledges.fund',
                 ])
                 ->find($user->person_id);
         }

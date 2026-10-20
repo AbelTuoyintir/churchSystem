@@ -2,9 +2,12 @@
 
 use App\Models\Assignment;
 use App\Models\Attendance;
+use App\Models\Contribution;
+use App\Models\Fund;
 use App\Models\Group;
 use App\Models\Household;
 use App\Models\Person;
+use App\Models\Pledge;
 use App\Models\Service;
 use App\Models\Team;
 use App\Models\TeamPosition;
@@ -82,12 +85,14 @@ test('dashboard redirects member role to member-portal', function () {
         ->assertRedirect('/member-portal');
 });
 
-test('dashboard redirects admin role to people index', function () {
+test('dashboard renders overview for admin role', function () {
     $user = User::factory()->create(['role' => 'admin']);
 
     $this->actingAs($user)
         ->get('/dashboard')
-        ->assertRedirect('/people');
+        ->assertStatus(200)
+        ->assertSeeLivewire('dashboard.admin-overview')
+        ->assertSeeLivewire('dashboard.attendance-this-week');
 });
 
 test('member can edit contact information from member portal', function () {
@@ -138,4 +143,49 @@ test('unlinked user cannot update profile in member portal', function () {
         ->set('phone', '555-000-1111')
         ->call('updateProfile')
         ->assertSee('No linked profile found.');
+});
+
+test('member can view personal contributions and pledge progress on member portal', function () {
+    $person = Person::factory()->create([
+        'first_name' => 'Sarah',
+        'last_name' => 'Giver',
+    ]);
+
+    $user = User::factory()->create([
+        'person_id' => $person->id,
+        'role' => 'member',
+    ]);
+
+    $fund = Fund::create([
+        'name' => 'Mission Expansion Fund',
+    ]);
+
+    Contribution::create([
+        'person_id' => $person->id,
+        'fund_id' => $fund->id,
+        'amount' => 500.00,
+        'method' => 'online',
+        'contributed_on' => now()->toDateString(),
+        'note' => 'Mission pledge payment',
+    ]);
+
+    Pledge::create([
+        'person_id' => $person->id,
+        'fund_id' => $fund->id,
+        'amount' => 1000.00,
+        'frequency' => 'monthly',
+        'start_date' => now()->startOfYear()->toDateString(),
+        'end_date' => now()->endOfYear()->toDateString(),
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->assertStatus(200)
+        ->assertSee('My Giving', false)
+        ->assertSee('Mission Expansion Fund')
+        ->assertSee('$500.00')
+        ->assertSee('My Pledges', false)
+        ->assertSee('Goal: $1,000.00')
+        ->assertSee('Raised: $500.00 (50%)');
 });

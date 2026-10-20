@@ -13,6 +13,9 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-4 sm:-my-px sm:ms-6 sm:flex sm:items-center">
                     @if(in_array(Auth::user()->role, ['admin', 'staff', 'leader', 'viewer']))
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('people.index')" :active="request()->routeIs('people.*')">
                             {{ __('People') }}
                         </x-nav-link>

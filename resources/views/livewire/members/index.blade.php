@@ -338,6 +338,106 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Personal Giving & Contributions History -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            My Giving & Contributions History
+                        </h3>
+                        @if(!$person->contributions->isEmpty())
+                            <span class="inline-flex items-center px-3 py-1 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold rounded-full">
+                                Total Given: ${{ number_format($person->contributions->sum('amount'), 2) }}
+                            </span>
+                        @endif
+                    </div>
+
+                    @if($person->contributions->isEmpty())
+                        <p class="text-sm text-gray-500 italic">No recorded contributions found.</p>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-600">
+                                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                    <tr>
+                                        <th class="px-4 py-2">Date</th>
+                                        <th class="px-4 py-2">Fund</th>
+                                        <th class="px-4 py-2">Amount</th>
+                                        <th class="px-4 py-2">Method</th>
+                                        <th class="px-4 py-2">Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    @foreach($person->contributions->sortByDesc('contributed_on') as $contribution)
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium text-gray-900">
+                                                {{ $contribution->contributed_on ? \Carbon\Carbon::parse($contribution->contributed_on)->format('M d, Y') : 'N/A' }}
+                                            </td>
+                                            <td class="px-4 py-2">{{ $contribution->fund?->name ?? 'General' }}</td>
+                                            <td class="px-4 py-2 font-semibold text-green-700">${{ number_format($contribution->amount, 2) }}</td>
+                                            <td class="px-4 py-2 capitalize">{{ $contribution->method ?? 'N/A' }}</td>
+                                            <td class="px-4 py-2 text-xs text-gray-500">{{ $contribution->note ?? '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Personal Pledges & Progress -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        My Pledges & Capital Campaigns
+                    </h3>
+
+                    @if($person->pledges->isEmpty())
+                        <p class="text-sm text-gray-500 italic">No active pledges found.</p>
+                    @else
+                        <div class="space-y-4">
+                            @foreach($person->pledges as $pledge)
+                                @php
+                                    $contributedTowardsPledge = $person->contributions
+                                        ->where('fund_id', $pledge->fund_id)
+                                        ->when($pledge->start_date, fn($c) => $c->where('contributed_on', '>=', $pledge->start_date))
+                                        ->when($pledge->end_date, fn($c) => $c->where('contributed_on', '<=', $pledge->end_date))
+                                        ->sum('amount');
+                                    $percentage = $pledge->amount > 0 ? min(100, round(($contributedTowardsPledge / $pledge->amount) * 100)) : 0;
+                                @endphp
+                                <div class="border rounded-md p-4 bg-gray-50 space-y-3">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <div>
+                                            <h4 class="font-bold text-gray-900 text-base">{{ $pledge->fund?->name ?? 'Fund Pledge' }}</h4>
+                                            <p class="text-xs text-gray-500">
+                                                Frequency: <span class="capitalize font-medium text-gray-700">{{ $pledge->frequency ?? 'one-time' }}</span>
+                                                @if($pledge->start_date)
+                                                    | Period: {{ \Carbon\Carbon::parse($pledge->start_date)->format('M d, Y') }}
+                                                    @if($pledge->end_date) - {{ \Carbon\Carbon::parse($pledge->end_date)->format('M d, Y') }} @endif
+                                                @endif
+                                            </p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xs text-gray-500 uppercase font-semibold">Goal: ${{ number_format($pledge->amount, 2) }}</div>
+                                            <div class="text-sm font-bold text-indigo-600">
+                                                Raised: ${{ number_format($contributedTowardsPledge, 2) }} ({{ $percentage }}%)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Progress Bar -->
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ $percentage }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     @endif
