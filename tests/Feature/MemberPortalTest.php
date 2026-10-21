@@ -2,9 +2,12 @@
 
 use App\Models\Assignment;
 use App\Models\Attendance;
+use App\Models\Contribution;
+use App\Models\Fund;
 use App\Models\Group;
 use App\Models\Household;
 use App\Models\Person;
+use App\Models\Pledge;
 use App\Models\Service;
 use App\Models\Team;
 use App\Models\TeamPosition;
@@ -82,12 +85,47 @@ test('dashboard redirects member role to member-portal', function () {
         ->assertRedirect('/member-portal');
 });
 
-test('dashboard redirects admin role to people index', function () {
+test('dashboard renders admin overview for admin role', function () {
     $user = User::factory()->create(['role' => 'admin']);
 
     $this->actingAs($user)
         ->get('/dashboard')
-        ->assertRedirect('/people');
+        ->assertStatus(200)
+        ->assertSee('Total People');
+});
+
+test('member can view personal contributions and pledges in member portal', function () {
+    $person = Person::factory()->create(['first_name' => 'Alice', 'last_name' => 'Donor']);
+    $user = User::factory()->create(['person_id' => $person->id, 'role' => 'member']);
+
+    $fund = Fund::create(['name' => 'General Fund', 'is_active' => true]);
+
+    Contribution::create([
+        'person_id' => $person->id,
+        'fund_id' => $fund->id,
+        'amount' => 500.00,
+        'contributed_on' => now()->toDateString(),
+        'method' => 'online',
+        'note' => 'Building pledge payment',
+    ]);
+
+    Pledge::create([
+        'person_id' => $person->id,
+        'fund_id' => $fund->id,
+        'amount' => 1200.00,
+        'frequency' => 'monthly',
+        'start_date' => now()->startOfYear()->toDateString(),
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->assertStatus(200)
+        ->assertSee('Personal Giving')
+        ->assertSee('General Fund')
+        ->assertSee('$500.00')
+        ->assertSee('$1,200.00')
+        ->assertSee('Building pledge payment');
 });
 
 test('member can edit contact information from member portal', function () {

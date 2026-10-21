@@ -338,6 +338,87 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Personal Giving & Pledges -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Personal Giving & Pledges
+                        </h3>
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                            Total Given: ${{ number_format($person->contributions->sum('amount'), 2) }}
+                        </span>
+                    </div>
+
+                    <!-- Pledges Sub-section -->
+                    <div class="space-y-3">
+                        <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Pledges</h4>
+                        @if($person->pledges->isEmpty())
+                            <p class="text-sm text-gray-500 italic">No active or past pledges recorded.</p>
+                        @else
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-gray-600">
+                                    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                        <tr>
+                                            <th class="px-4 py-2">Fund</th>
+                                            <th class="px-4 py-2">Pledged Amount</th>
+                                            <th class="px-4 py-2">Frequency</th>
+                                            <th class="px-4 py-2">Date Range</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        @foreach($person->pledges as $pledge)
+                                            <tr>
+                                                <td class="px-4 py-2 font-medium text-gray-900">{{ $pledge->fund?->name ?? 'General Fund' }}</td>
+                                                <td class="px-4 py-2 text-emerald-700 font-semibold">${{ number_format($pledge->amount, 2) }}</td>
+                                                <td class="px-4 py-2 capitalize">{{ str_replace('_', ' ', $pledge->frequency) }}</td>
+                                                <td class="px-4 py-2 text-xs text-gray-500">
+                                                    {{ $pledge->start_date?->format('M d, Y') }} - {{ $pledge->end_date?->format('M d, Y') ?? 'Ongoing' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Contributions History Sub-section -->
+                    <div class="space-y-3 pt-2">
+                        <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Recent Contributions</h4>
+                        @if($person->contributions->isEmpty())
+                            <p class="text-sm text-gray-500 italic">No contribution records found.</p>
+                        @else
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-gray-600">
+                                    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                        <tr>
+                                            <th class="px-4 py-2">Date</th>
+                                            <th class="px-4 py-2">Fund</th>
+                                            <th class="px-4 py-2">Method</th>
+                                            <th class="px-4 py-2">Note / Ref</th>
+                                            <th class="px-4 py-2 text-right">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        @foreach($person->contributions->take(10) as $contribution)
+                                            <tr>
+                                                <td class="px-4 py-2 font-medium text-gray-900">{{ $contribution->contributed_on?->format('M d, Y') ?? 'N/A' }}</td>
+                                                <td class="px-4 py-2">{{ $contribution->fund?->name ?? 'General Fund' }}</td>
+                                                <td class="px-4 py-2 capitalize">{{ $contribution->method }}</td>
+                                                <td class="px-4 py-2 text-xs text-gray-500">{{ $contribution->note ?: ($contribution->reference ?: '-') }}</td>
+                                                <td class="px-4 py-2 text-right font-semibold text-emerald-700">${{ number_format($contribution->amount, 2) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     @endif
