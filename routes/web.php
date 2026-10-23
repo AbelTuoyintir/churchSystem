@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('members.portal');
         }
 
-        return redirect()->route('people.index');
+        return view('dashboard');
     })->name('dashboard');
 
     Route::get('/member-portal', MembersIndex::class)->name('members.portal');

@@ -338,6 +338,83 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Personal Giving & Pledges -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            My Giving & Pledges
+                        </h3>
+                        <div class="text-sm font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                            Total YTD: ${{ number_format($person->contributions->where('contributed_on', '>=', now()->startOfYear())->sum('amount'), 2) }}
+                        </div>
+                    </div>
+
+                    @if($person->contributions->isEmpty() && $person->pledges->isEmpty())
+                        <p class="text-sm text-gray-500 italic">No personal contribution or pledge records found.</p>
+                    @else
+                        @if(!$person->contributions->isEmpty())
+                            <div>
+                                <h4 class="text-xs font-semibold uppercase text-gray-500 mb-2">Recent Contributions</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left text-gray-600">
+                                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                            <tr>
+                                                <th class="px-4 py-2">Date</th>
+                                                <th class="px-4 py-2">Fund</th>
+                                                <th class="px-4 py-2">Amount</th>
+                                                <th class="px-4 py-2">Method</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200">
+                                            @foreach($person->contributions->take(5) as $contribution)
+                                                <tr>
+                                                    <td class="px-4 py-2 font-medium text-gray-900">{{ $contribution->contributed_on?->format('M d, Y') ?? 'N/A' }}</td>
+                                                    <td class="px-4 py-2">{{ $contribution->fund?->name ?? 'General' }}</td>
+                                                    <td class="px-4 py-2 font-semibold text-emerald-600">${{ number_format($contribution->amount, 2) }}</td>
+                                                    <td class="px-4 py-2 capitalize">{{ $contribution->method }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(!$person->pledges->isEmpty())
+                            <div class="pt-2">
+                                <h4 class="text-xs font-semibold uppercase text-gray-500 mb-2">My Pledges</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left text-gray-600">
+                                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                                            <tr>
+                                                <th class="px-4 py-2">Fund</th>
+                                                <th class="px-4 py-2">Pledge Amount</th>
+                                                <th class="px-4 py-2">Frequency</th>
+                                                <th class="px-4 py-2">Period</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200">
+                                            @foreach($person->pledges as $pledge)
+                                                <tr>
+                                                    <td class="px-4 py-2 font-medium text-gray-900">{{ $pledge->fund?->name ?? 'General' }}</td>
+                                                    <td class="px-4 py-2 font-semibold text-indigo-600">${{ number_format($pledge->amount, 2) }}</td>
+                                                    <td class="px-4 py-2 capitalize">{{ $pledge->frequency }}</td>
+                                                    <td class="px-4 py-2 text-xs text-gray-500">
+                                                        {{ $pledge->start_date?->format('M Y') }} - {{ $pledge->end_date?->format('M Y') }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+                </div>
             </div>
         </div>
     @endif
