@@ -9,26 +9,26 @@ class AttendancePolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader', 'viewer']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer']);
     }
 
     public function view(User $user, Attendance $attendance): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader', 'viewer']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer']);
     }
 
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader']);
     }
 
     public function update(User $user, Attendance $attendance): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader']);
     }
 
     public function delete(User $user, Attendance $attendance): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader']);
     }
 }

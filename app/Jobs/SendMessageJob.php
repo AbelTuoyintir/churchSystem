@@ -38,6 +38,14 @@ class SendMessageJob implements ShouldQueue
             $query->where('sms_opt_in', true)
                 ->whereNotNull('phone')
                 ->where('phone', '!=', '');
+        } elseif ($this->message->channel === 'both') {
+            $query->where(function ($q) {
+                $q->where(function ($eq) {
+                    $eq->where('email_opt_in', true)->whereNotNull('email')->where('email', '!=', '');
+                })->orWhere(function ($sq) {
+                    $sq->where('sms_opt_in', true)->whereNotNull('phone')->where('phone', '!=', '');
+                });
+            });
         }
 
         if (!empty($filter['membership_status'])) {
@@ -67,34 +75,64 @@ class SendMessageJob implements ShouldQueue
         $people = $query->get();
 
         foreach ($people as $person) {
-            $address = $this->message->channel === 'email' ? $person->email : $person->phone;
-            if (!$address) {
-                continue;
+            $channelsToSend = [];
+            if ($this->message->channel === 'email' && $person->email) {
+                $channelsToSend[] = ['channel' => 'email', 'address' => $person->email];
+            } elseif ($this->message->channel === 'sms' && $person->phone) {
+                $channelsToSend[] = ['channel' => 'sms', 'address' => $person->phone];
+            } elseif ($this->message->channel === 'both') {
+                if ($person->email && $person->email_opt_in) {
+                    $channelsToSend[] = ['channel' => 'email', 'address' => $person->email];
+                }
+                if ($person->phone && $person->sms_opt_in) {
+                    $channelsToSend[] = ['channel' => 'sms', 'address' => $person->phone];
+                }
             }
 
-            $recipient = MessageRecipient::firstOrCreate([
-                'message_id' => $this->message->id,
-                'person_id' => $person->id,
-            ], [
-                'channel' => $this->message->channel,
-                'address' => $address,
-                'status' => 'pending',
-            ]);
-
-            // TODO: Call $sender->send($this->message, $recipient) to send message via email/SMS provider
-            $sent = $sender->send($this->message, $recipient);
-
-            if ($sent) {
-                $recipient->update([
-                    'status' => 'sent',
-                    'sent_at' => now(),
+            foreach ($channelsToSend as $ch) {
+                $recipient = MessageRecipient::firstOrCreate([
+                    'message_id' => $this->message->id,
+                    'person_id' => $person->id,
+                    'channel' => $ch['channel'],
+                ], [
+                    'address' => $ch['address'],
+                    'status' => 'pending',
                 ]);
+
+                $sent = $sender->send($this->message, $recipient);
+
+                if ($sent) {
+                    $recipient->update([
+                        'status' => 'sent',
+                        'sent_at' => now(),
+                    ]);
+                } else {
+                    $recipient->update([
+                        'status' => 'failed',
+                        'error' => $recipient->error ?? 'Failed to send message via provider.',
+                    ]);
+                }
+            }
+        }
+
+        // Trigger Push Notification to church members
+        try {
+            $pushService = app(\App\Services\PushNotificationService::class);
+            $pushTitle = $this->message->subject ?: 'New Church Announcement';
+            $pushBody = \Illuminate\Support\Str::limit(strip_tags($this->message->body), 120);
+
+            if (!empty($filter['group_id'])) {
+                $group = \App\Models\Group::find($filter['group_id']);
+                if ($group) {
+                    $pushService->sendToGroup($group, $pushTitle, $pushBody, route('messages.show', $this->message));
+                } else {
+                    $pushService->sendToAll($pushTitle, $pushBody, route('messages.show', $this->message));
+                }
             } else {
-                $recipient->update([
-                    'status' => 'failed',
-                    'error' => 'Failed to send message via provider.',
-                ]);
+                $pushService->sendToAll($pushTitle, $pushBody, route('messages.show', $this->message));
             }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::info('Push notification dispatch note: ' . $e->getMessage());
         }
 
         $this->message->update([

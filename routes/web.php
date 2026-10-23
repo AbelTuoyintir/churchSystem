@@ -4,7 +4,9 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HouseholdMemberController;
 use App\Http\Controllers\MessageRecipientController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamPositionController;
@@ -13,6 +15,8 @@ use App\Livewire\Contributions\Form as ContributionsForm;
 use App\Livewire\Contributions\Index as ContributionsIndex;
 use App\Livewire\Funds\Form as FundsForm;
 use App\Livewire\Funds\Index as FundsIndex;
+use App\Livewire\Giving\MyGiving as GivingMy;
+use App\Livewire\Giving\Pay as GivingPay;
 use App\Livewire\Groups\Form as GroupsForm;
 use App\Livewire\Groups\Index as GroupsIndex;
 use App\Livewire\Households\Form as HouseholdsForm;
@@ -31,7 +35,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-    // return redirect()->route('login');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -82,7 +85,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pledges', PledgesIndex::class)->name('pledges.index');
     Route::get('/pledges/create', PledgesForm::class)->name('pledges.create');
     Route::get('/pledges/{pledge}/edit', PledgesForm::class)->name('pledges.edit');
+
+    // Online Giving & Paystack System
+    Route::get('/giving/pay', GivingPay::class)->name('giving.pay');
+    Route::get('/giving/my-contributions', GivingMy::class)->name('giving.my');
+    Route::post('/giving/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');
+    Route::get('/giving/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+    Route::get('/giving/receipt/{reference}', [PaymentController::class, 'receipt'])->name('payment.receipt');
+    Route::get('/giving/mock-checkout', [PaymentController::class, 'mockCheckout'])->name('payment.mock.checkout');
+
+    // Push Notifications
+    Route::post('/push/subscribe', [PushNotificationController::class, 'subscribe'])->name('push.subscribe');
+    Route::post('/push/test', [PushNotificationController::class, 'test'])->name('push.test');
 });
+
+// Paystack Webhook (excluded from CSRF)
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
 
 Route::resource('household-members', HouseholdMemberController::class);
 Route::resource('events', EventController::class);

@@ -9,26 +9,30 @@ class ContributionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 
     public function view(User $user, Contribution $contribution): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        if (in_array($user->role, ['admin', 'pastor', 'staff'])) {
+            return true;
+        }
+
+        return $user->person_id !== null && (int) $user->person_id === (int) $contribution->person_id;
     }
 
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'member']);
     }
 
     public function update(User $user, Contribution $contribution): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 
     public function delete(User $user, Contribution $contribution): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 }
