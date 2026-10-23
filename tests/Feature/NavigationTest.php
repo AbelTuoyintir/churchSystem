@@ -10,6 +10,7 @@ test('admin sees full navigation menu including financial links', function () {
     $response = $this->actingAs($admin)->get('/people');
 
     $response->assertStatus(200);
+    $response->assertSee('Dashboard');
     $response->assertSee('People');
     $response->assertSee('Households');
     $response->assertSee('Groups');
