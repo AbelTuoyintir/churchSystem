@@ -49,9 +49,4 @@ class PersonPolicy
     {
         return in_array($user->role, ['admin', 'staff']);
     }
-
-    public function generatePassword(User $user, Person $person): bool
-    {
-        return in_array($user->role, ['admin', 'staff']);
-    }
 }
