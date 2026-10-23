@@ -9,12 +9,12 @@ class PersonPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader', 'viewer']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer']);
     }
 
     public function view(User $user, Person $person): bool
     {
-        if (in_array($user->role, ['admin', 'staff', 'leader', 'viewer'])) {
+        if (in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer'])) {
             return true;
         }
 
@@ -23,7 +23,7 @@ class PersonPolicy
 
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 
     public function update(User $user, Person $person): bool
@@ -37,10 +37,15 @@ class PersonPolicy
 
     public function delete(User $user, Person $person): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 
     public function viewNotes(User $user, ?Person $person = null): bool
+    {
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
+    }
+
+    public function generatePassword(User $user, Person $person): bool
     {
         return in_array($user->role, ['admin', 'staff']);
     }

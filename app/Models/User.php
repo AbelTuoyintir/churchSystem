@@ -70,4 +70,43 @@ class User extends Authenticatable
     {
         return $this->hasMany(Contribution::class, 'recorded_by');
     }
+
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isPastor(): bool
+    {
+        return in_array($this->role, ['pastor', 'admin']);
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['admin', 'pastor', 'staff']);
+    }
+
+    public function isLeader(): bool
+    {
+        if (in_array($this->role, ['admin', 'pastor', 'staff', 'leader'])) {
+            return true;
+        }
+
+        if ($this->person_id && $this->person) {
+            return $this->person->ledGroups()->exists() ||
+                $this->person->groups()->wherePivot('role', 'leader')->exists();
+        }
+
+        return false;
+    }
+
+    public function isMember(): bool
+    {
+        return $this->role === 'member';
+    }
 }

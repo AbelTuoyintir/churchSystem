@@ -41,6 +41,16 @@ class EventController extends Controller
 
         $event = Event::create($validated);
 
+        try {
+            app(\App\Services\PushNotificationService::class)->sendToAll(
+                'New Church Event: ' . $event->title,
+                $event->description ?: ('Join us on ' . ($event->starts_at ? date('M d, Y', strtotime($event->starts_at)) : 'upcoming date')),
+                route('members.portal')
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::info('Event push notification note: ' . $e->getMessage());
+        }
+
         return response()->json($event, 201);
     }
 
