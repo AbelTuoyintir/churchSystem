@@ -3,11 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\Group;
-use App\Models\Person;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Group>
+ * @extends Factory<Group>
  */
 class GroupFactory extends Factory
 {
@@ -16,7 +15,7 @@ class GroupFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->words(2, true) . ' Group',
+            'name' => fake()->words(2, true).' Group',
             'description' => fake()->sentence(),
             'type' => fake()->randomElement(['small_group', 'ministry', 'committee', 'class']),
             'leader_id' => null,

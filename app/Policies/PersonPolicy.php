@@ -28,7 +28,11 @@ class PersonPolicy
 
     public function update(User $user, Person $person): bool
     {
-        return in_array($user->role, ['admin', 'pastor', 'staff']);
+        if (in_array($user->role, ['admin', 'staff'])) {
+            return true;
+        }
+
+        return $user->person_id !== null && (int) $user->person_id === (int) $person->id;
     }
 
     public function delete(User $user, Person $person): bool
@@ -39,5 +43,15 @@ class PersonPolicy
     public function viewNotes(User $user, ?Person $person = null): bool
     {
         return in_array($user->role, ['admin', 'pastor', 'staff']);
+    }
+
+    public function generatePassword(User $user, Person $person): bool
+    {
+        return in_array($user->role, ['admin', 'staff']);
+    }
+
+    public function generatePassword(User $user, Person $person): bool
+    {
+        return in_array($user->role, ['admin', 'staff']);
     }
 }

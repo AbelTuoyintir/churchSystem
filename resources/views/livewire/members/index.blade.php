@@ -1,4 +1,17 @@
 <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Session Flash Message -->
+    @if (session()->has('success'))
+        <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline">{{ session('error') }}</span>
+        </div>
+    @endif
+
     <!-- Welcome Header -->
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -9,8 +22,15 @@
                 Member Portal - View your profile, family household, group memberships, serving assignments, and attendance history.
             </p>
         </div>
-        <div class="inline-flex items-center px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-full capitalize">
-            Role: {{ $user->role }}
+        <div class="flex items-center gap-3">
+            <div class="inline-flex items-center px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-full capitalize">
+                Role: {{ $user->role }}
+            </div>
+            @if($person)
+                <button wire:click="toggleEdit" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md shadow-sm transition">
+                    {{ $isEditing ? 'Cancel Edit' : 'Edit Contact Info' }}
+                </button>
+            @endif
         </div>
     </div>
 
@@ -33,60 +53,154 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Profile Info Card -->
             <div class="lg:col-span-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
-                <div class="flex items-center space-x-4">
-                    <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 font-bold text-2xl flex items-center justify-center shrink-0">
-                        {{ strtoupper(substr($person->first_name, 0, 1) . substr($person->last_name, 0, 1)) }}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 font-bold text-2xl flex items-center justify-center shrink-0">
+                            {{ strtoupper(substr($person->first_name, 0, 1) . substr($person->last_name, 0, 1)) }}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">{{ $person->full_name }}</h3>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                                Status: {{ $person->membership_status }}
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900">{{ $person->full_name }}</h3>
-                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                            Status: {{ $person->membership_status }}
-                        </span>
-                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button wire:click="toggleEdit" type="button" class="text-xs font-semibold text-indigo-600 hover:text-indigo-900 border border-indigo-200 px-3 py-1 rounded hover:bg-indigo-50">
+                        {{ $isEditing ? 'Cancel Edit' : 'Edit Contact Info' }}
+                    </button>
                 </div>
 
                 <hr class="border-gray-200" />
 
-                <div class="space-y-3 text-sm text-gray-700">
-                    <div>
-                        <span class="block text-xs font-semibold text-gray-500 uppercase">Email</span>
-                        <span class="text-gray-900">{{ $person->email ?: 'N/A' }}</span>
+                @if(!$isEditing)
+                    <div class="space-y-3 text-sm text-gray-700">
+                        @if($person->preferred_name)
+                            <div>
+                                <span class="block text-xs font-semibold text-gray-500 uppercase">Preferred Name</span>
+                                <span class="text-gray-900">{{ $person->preferred_name }}</span>
+                            </div>
+                        @endif
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Email</span>
+                            <span class="text-gray-900">{{ $person->email ?: 'N/A' }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Phone</span>
+                            <span class="text-gray-900">{{ $person->phone ?: 'N/A' }}</span>
+                        </div>
+                        @if($person->alternate_phone)
+                            <div>
+                                <span class="block text-xs font-semibold text-gray-500 uppercase">Alt Phone</span>
+                                <span class="text-gray-900">{{ $person->alternate_phone }}</span>
+                            </div>
+                        @endif
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Address</span>
+                            <span class="text-gray-900">
+                                @if($person->address_line1)
+                                    {{ $person->address_line1 }}<br>
+                                    @if($person->address_line2){{ $person->address_line2 }}<br>@endif
+                                    {{ $person->city }}, {{ $person->state }} {{ $person->postal_code }}
+                                @else
+                                    N/A
+                                @endif
+                            </span>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Date of Birth</span>
+                            <span class="text-gray-900">{{ $person->date_of_birth ? $person->date_of_birth->format('M d, Y') : 'N/A' }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Communication Preferences</span>
+                            <span class="text-gray-900 text-xs">
+                                Email: {{ $person->email_opt_in ? 'Subscribed' : 'Opted Out' }} | SMS: {{ $person->sms_opt_in ? 'Subscribed' : 'Opted Out' }}
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <span class="block text-xs font-semibold text-gray-500 uppercase">Phone</span>
-                        <span class="text-gray-900">{{ $person->phone ?: 'N/A' }}</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-semibold text-gray-500 uppercase">Address</span>
-                        <span class="text-gray-900">
-                            @if($person->address_line1)
-                                {{ $person->address_line1 }}<br>
-                                @if($person->address_line2){{ $person->address_line2 }}<br>@endif
-                                {{ $person->city }}, {{ $person->state }} {{ $person->postal_code }}
-                            @else
-                                N/A
-                            @endif
-                        </span>
-                    </div>
-                    <div>
-                        <span class="block text-xs font-semibold text-gray-500 uppercase">Date of Birth</span>
-                        <span class="text-gray-900">{{ $person->date_of_birth ? $person->date_of_birth->format('M d, Y') : 'N/A' }}</span>
-                    </div>
-                </div>
+                @else
+                    <form wire:submit.prevent="updateProfile" class="space-y-3 text-sm">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Preferred Name</label>
+                            <input type="text" wire:model="preferred_name" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('preferred_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
 
-                <hr class="border-gray-200" />
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Phone</label>
+                            <input type="text" wire:model="phone" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
 
-                <!-- Online Giving & Pledges Quick Links -->
-                <div class="space-y-2 pt-2">
-                    <span class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Giving &amp; Support</span>
-                    <a href="{{ route('giving.pay') }}" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>Give Online (Paystack)</span>
-                    </a>
-                    <a href="{{ route('giving.my') }}" class="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-lg text-xs transition">
-                        <span>My Contributions &amp; Pledges</span>
-                    </a>
-                </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Alternate Phone</label>
+                            <input type="text" wire:model="alternate_phone" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('alternate_phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Address Line 1</label>
+                            <input type="text" wire:model="address_line1" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('address_line1') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Address Line 2</label>
+                            <input type="text" wire:model="address_line2" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('address_line2') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase">City</label>
+                                <input type="text" wire:model="city" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('city') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 uppercase">State</label>
+                                <input type="text" wire:model="state" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                @error('state') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Postal Code</label>
+                            <input type="text" wire:model="postal_code" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('postal_code') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Date of Birth</label>
+                            <input type="date" wire:model="date_of_birth" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('date_of_birth') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="space-y-1 pt-2">
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Communication Preferences</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="inline-flex items-center text-xs text-gray-700">
+                                    <input type="checkbox" wire:model="email_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-1.5">
+                                    Receive Emails
+                                </label>
+                                <label class="inline-flex items-center text-xs text-gray-700">
+                                    <input type="checkbox" wire:model="sms_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-1.5">
+                                    Receive SMS
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex items-center gap-2">
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white font-semibold text-xs rounded hover:bg-indigo-700">
+                                Save Profile
+                            </button>
+                            <button type="button" wire:click="toggleEdit" class="px-4 py-2 bg-gray-200 text-gray-700 font-semibold text-xs rounded hover:bg-gray-300">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                @endif
             </div>
 
             <!-- Main Content Tabs / Sections -->
@@ -192,7 +306,7 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
                     <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
                         Recent Attendance
                     </h3>
@@ -227,4 +341,5 @@
             </div>
         </div>
     @endif
+
 </div>

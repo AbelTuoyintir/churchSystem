@@ -12,9 +12,13 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $date_from = '';
+
     public string $date_to = '';
+
     public string $fund_id = '';
+
     public string $method = '';
 
     protected $queryString = [
@@ -59,11 +63,11 @@ class Index extends Component
             ->when($this->search !== '', function ($query) {
                 $query->where(function ($q) {
                     $q->whereHas('person', function ($pq) {
-                        $pq->where('first_name', 'like', '%' . $this->search . '%')
-                           ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                        $pq->where('first_name', 'like', '%'.$this->search.'%')
+                            ->orWhere('last_name', 'like', '%'.$this->search.'%');
                     })
-                    ->orWhere('reference', 'like', '%' . $this->search . '%')
-                    ->orWhere('note', 'like', '%' . $this->search . '%');
+                        ->orWhere('reference', 'like', '%'.$this->search.'%')
+                        ->orWhere('note', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->date_from !== '', function ($query) {

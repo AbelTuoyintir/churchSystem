@@ -12,10 +12,15 @@ class Form extends Component
     public ?Pledge $pledge = null;
 
     public ?int $person_id = null;
+
     public ?int $fund_id = null;
+
     public string $amount = '';
+
     public string $frequency = 'monthly';
+
     public string $start_date = '';
+
     public ?string $end_date = null;
 
     public string $personSearch = '';
@@ -34,7 +39,7 @@ class Form extends Component
             $this->end_date = $pledge->end_date ? $pledge->end_date->format('Y-m-d') : null;
         } else {
             $this->authorize('create', Pledge::class);
-            $this->pledge = new Pledge();
+            $this->pledge = new Pledge;
             $this->start_date = now()->format('Y-m-d');
 
             $defaultFund = Fund::where('is_active', true)->first();
@@ -88,8 +93,8 @@ class Form extends Component
         $peopleQuery = Person::query()->orderBy('last_name')->orderBy('first_name');
         if ($this->personSearch !== '') {
             $peopleQuery->where(function ($q) {
-                $q->where('first_name', 'like', '%' . $this->personSearch . '%')
-                  ->orWhere('last_name', 'like', '%' . $this->personSearch . '%');
+                $q->where('first_name', 'like', '%'.$this->personSearch.'%')
+                    ->orWhere('last_name', 'like', '%'.$this->personSearch.'%');
             });
         }
         $people = $peopleQuery->limit(50)->get();

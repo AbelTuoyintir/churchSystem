@@ -11,8 +11,11 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $state = '';
+
     public bool $confirmingDeletion = false;
+
     public ?int $householdIdBeingDeleted = null;
 
     protected $queryString = [
@@ -56,12 +59,12 @@ class Index extends Component
         $households = Household::query()
             ->withCount('members')
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('city', 'like', '%' . $this->search . '%')
-                    ->orWhere('phone', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('city', 'like', '%'.$this->search.'%')
+                    ->orWhere('phone', 'like', '%'.$this->search.'%');
             })
             ->when($this->state, function ($query) {
-                $query->where('state', 'like', '%' . $this->state . '%');
+                $query->where('state', 'like', '%'.$this->state.'%');
             })
             ->orderBy('name', 'asc')
             ->paginate(25);

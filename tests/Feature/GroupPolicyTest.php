@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Policies\GroupPolicy;
 
 test('group policy permits admin and staff for all actions', function () {
-    $policy = new GroupPolicy();
+    $policy = new GroupPolicy;
     $admin = User::factory()->create(['role' => 'admin']);
     $staff = User::factory()->create(['role' => 'staff']);
     $group = Group::factory()->create();
@@ -21,7 +21,7 @@ test('group policy permits admin and staff for all actions', function () {
 });
 
 test('leader can view, viewAny, and update own group but not create or delete or update other groups', function () {
-    $policy = new GroupPolicy();
+    $policy = new GroupPolicy;
     $leaderPerson = Person::factory()->create();
     $leader = User::factory()->create(['role' => 'leader', 'person_id' => $leaderPerson->id]);
 
@@ -41,7 +41,7 @@ test('leader can view, viewAny, and update own group but not create or delete or
 });
 
 test('viewer is read only', function () {
-    $policy = new GroupPolicy();
+    $policy = new GroupPolicy;
     $viewer = User::factory()->create(['role' => 'viewer']);
     $group = Group::factory()->create();
 

@@ -14,16 +14,23 @@ class Form extends Component
     public ?Message $message = null;
 
     public string $subject = '';
+
     public string $body = '';
+
     public string $channel = 'email';
+
     public ?string $scheduled_at = null;
 
     // Audience selection: 'church' or 'group'
     public string $target_audience = 'church';
     public string $membership_status = '';
+
     public string $group_id = '';
+
     public string $team_id = '';
+
     public bool $email_opt_in = false;
+
     public bool $sms_opt_in = false;
 
     public bool $canBroadcastToChurch = true;
@@ -51,28 +58,11 @@ class Form extends Component
             $this->membership_status = $filter['membership_status'] ?? '';
             $this->group_id = isset($filter['group_id']) ? (string) $filter['group_id'] : '';
             $this->team_id = isset($filter['team_id']) ? (string) $filter['team_id'] : '';
-            $this->email_opt_in = !empty($filter['email_opt_in']);
-            $this->sms_opt_in = !empty($filter['sms_opt_in']);
+            $this->email_opt_in = ! empty($filter['email_opt_in']);
+            $this->sms_opt_in = ! empty($filter['sms_opt_in']);
         } else {
             $this->authorize('create', Message::class);
-            $this->message = new Message();
-
-            // If leader has only one group, auto-select it
-            if (!$this->canBroadcastToChurch && $user && $user->person_id) {
-                $ledGroup = Group::where('leader_id', $user->person_id)
-                    ->orWhereHas('members', fn($q) => $q->where('people.id', $user->person_id)->where('group_members.role', 'leader'))
-                    ->first();
-                if ($ledGroup) {
-                    $this->group_id = (string) $ledGroup->id;
-                }
-            }
-        }
-    }
-
-    public function updatedTargetAudience(): void
-    {
-        if ($this->target_audience === 'church') {
-            $this->group_id = '';
+            $this->message = new Message;
         }
     }
 
@@ -153,7 +143,7 @@ class Form extends Component
         ];
 
         $status = 'draft';
-        if (!empty($this->scheduled_at) && strtotime($this->scheduled_at) > time()) {
+        if (! empty($this->scheduled_at) && strtotime($this->scheduled_at) > time()) {
             $status = 'scheduled';
         }
 

@@ -11,8 +11,11 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $isActive = '';
+
     public bool $confirmingDeletion = false;
+
     public ?int $serviceIdBeingDeleted = null;
 
     protected $queryString = [
@@ -70,8 +73,8 @@ class Index extends Component
 
         $services = Service::query()
             ->when($this->search !== '', function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('location', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('location', 'like', '%'.$this->search.'%');
             })
             ->when($this->isActive !== '', function ($query) {
                 $query->where('is_active', filter_var($this->isActive, FILTER_VALIDATE_BOOLEAN));

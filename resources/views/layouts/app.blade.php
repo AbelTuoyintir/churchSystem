@@ -63,82 +63,27 @@
                 </button>
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
-                @php
-                    $u = auth()->user();
-                    $isAdminOrPastor = $u && ($u->isAdmin() || $u->isPastor() || $u->role === 'staff');
-                    $isLeader = $u && $u->isLeader();
-                    $isMemberOnly = $u && !$isAdminOrPastor && !$isLeader;
-                @endphp
+            <nav class="flex-1 p-4 space-y-1">
+                <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 {{ request()->routeIs('dashboard') ? 'bg-gray-800 text-white' : 'text-gray-300' }}">
+                    <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Dashboard
+                </a>
 
-                <!-- 1. GENERAL / PORTAL SECTION -->
-                <div class="space-y-1">
-                    <div class="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">Main</div>
+                <a href="{{ route('members.portal') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 {{ request()->routeIs('members.portal') ? 'bg-gray-800 text-white' : 'text-gray-300' }}">
+                    <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    My Portal
+                </a>
 
-                    @if($isAdminOrPastor)
-                        <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                            <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            Admin Dashboard
-                        </a>
-                    @endif
-
-                    <a href="{{ route('members.portal') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('members.portal') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('members.portal') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        My Portal &amp; Profile
-                    </a>
-                </div>
-
-                <!-- 2. GIVING & PAYSTACK SYSTEM (VISIBLE TO MEMBERS & LEADERS) -->
-                <div class="space-y-1">
-                    <div class="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">Giving &amp; Paystack</div>
-
-                    <a href="{{ route('giving.pay') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('giving.pay') ? 'bg-indigo-600 text-white shadow-sm' : 'text-emerald-400 hover:bg-gray-800 hover:text-emerald-300' }}">
-                        <svg class="w-5 h-5 mr-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Give Online (Paystack)</span>
-                    </a>
-
-                    <a href="{{ route('giving.my') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('giving.my') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                        </svg>
-                        My Giving &amp; Pledges
-                    </a>
-                </div>
-
-                <!-- 3. BROADCASTING & MESSAGES (PASTOR, ADMIN, GROUP LEADER) -->
-                @can('viewAny', App\Models\Message::class)
-                <div class="space-y-1">
-                    <div class="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">Broadcasting</div>
-
-                    <a href="{{ route('messages.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('messages.index') || request()->routeIs('messages.show') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Broadcasts &amp; Messages
-                    </a>
-
-                    @can('create', App\Models\Message::class)
-                    <a href="{{ route('messages.create') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition {{ request()->routeIs('messages.create') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        New Broadcast (SMS/Email)
-                    </a>
-                    @endcan
-                </div>
-                @endcan
-
-                <!-- 4. CHURCH OPERATIONS (ADMIN / PASTOR / STAFF ONLY) -->
-                @if($isAdminOrPastor)
-                <div class="space-y-1">
-                    <div class="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">Church Directory</div>
+                <a href="{{ route('personas.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 {{ request()->routeIs('personas.*') ? 'bg-gray-800 text-white' : 'text-gray-300' }}">
+                    <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 100 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 001 1m-6 0h6" />
+                    </svg>
+                    User Personas
+                </a>
 
                     @can('viewAny', App\Models\Person::class)
                     <a href="{{ route('people.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition {{ request()->routeIs('people.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">

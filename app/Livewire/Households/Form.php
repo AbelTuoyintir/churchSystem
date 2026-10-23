@@ -11,18 +11,28 @@ class Form extends Component
     public ?Household $household = null;
 
     public string $name = '';
+
     public string $address_line1 = '';
+
     public string $address_line2 = '';
+
     public string $city = '';
+
     public string $state = '';
+
     public string $postal_code = '';
+
     public string $country = '';
+
     public string $phone = '';
 
     // Household member attachment properties
     public string $selectedPersonId = '';
+
     public string $memberRole = 'other';
+
     public bool $confirmingMemberDetach = false;
+
     public ?int $personIdToDetach = null;
 
     public function mount(?Household $household = null): void
@@ -41,7 +51,7 @@ class Form extends Component
             $this->phone = $household->phone ?? '';
         } else {
             $this->authorize('create', Household::class);
-            $this->household = new Household();
+            $this->household = new Household;
         }
     }
 
@@ -82,7 +92,7 @@ class Form extends Component
 
     public function attachMember(): void
     {
-        if (!$this->household || !$this->household->exists) {
+        if (! $this->household || ! $this->household->exists) {
             return;
         }
 
@@ -94,7 +104,7 @@ class Form extends Component
         ]);
 
         $this->household->people()->syncWithoutDetaching([
-            $this->selectedPersonId => ['role' => $this->memberRole]
+            $this->selectedPersonId => ['role' => $this->memberRole],
         ]);
 
         $this->reset(['selectedPersonId']);
@@ -110,7 +120,7 @@ class Form extends Component
 
     public function detachMember(): void
     {
-        if (!$this->household || !$this->household->exists) {
+        if (! $this->household || ! $this->household->exists) {
             return;
         }
 

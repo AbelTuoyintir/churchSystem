@@ -4,6 +4,7 @@ namespace App\Livewire\People;
 
 use App\Models\Household;
 use App\Models\Person;
+use App\Services\CustomerPasswordService;
 use Livewire\Component;
 
 class Form extends Component
@@ -11,35 +12,68 @@ class Form extends Component
     public ?Person $person = null;
 
     public string $first_name = '';
+
     public string $middle_name = '';
+
     public string $last_name = '';
+
     public string $preferred_name = '';
+
     public string $email = '';
+
     public string $phone = '';
+
     public string $alternate_phone = '';
+
     public ?string $date_of_birth = null;
+
     public string $gender = '';
+
     public string $marital_status = '';
+
     public string $address_line1 = '';
+
     public string $address_line2 = '';
+
     public string $city = '';
+
     public string $state = '';
+
     public string $postal_code = '';
+
     public string $country = '';
+
     public string $photo_path = '';
+
     public string $membership_status = 'visitor';
+
     public ?string $joined_at = null;
+
     public ?string $baptized_at = null;
+
     public bool $email_opt_in = true;
+
     public bool $sms_opt_in = false;
+
     public string $notes = '';
+
     public bool $is_active = true;
 
     // Household attachment properties
     public string $selectedHouseholdId = '';
+
     public string $householdRole = 'other';
+
     public bool $confirmingHouseholdDetach = false;
+
     public ?int $householdIdToDetach = null;
+
+    // Password generation properties
+    public bool $confirmingPasswordGeneration = false;
+
+    public string $passwordChannel = 'auto';
+
+    public ?string $generatedPasswordNotice = null;
 
     public function mount(?Person $person = null): void
     {
@@ -73,7 +107,7 @@ class Form extends Component
             $this->is_active = (bool) $person->is_active;
         } else {
             $this->authorize('create', Person::class);
-            $this->person = new Person();
+            $this->person = new Person;
         }
     }
 
@@ -86,7 +120,7 @@ class Form extends Component
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'preferred_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255|unique:people,email,' . ($personId ?: 'NULL') . ',id,deleted_at,NULL',
+            'email' => 'nullable|email|max:255|unique:people,email,'.($personId ?: 'NULL').',id,deleted_at,NULL',
             'phone' => 'nullable|string|max:255',
             'alternate_phone' => 'nullable|string|max:255',
             'date_of_birth' => 'nullable|date',
@@ -134,9 +168,34 @@ class Form extends Component
         return redirect()->route('people.index');
     }
 
+    public function confirmGeneratePassword(): void
+    {
+        if (! $this->person || ! $this->person->exists) {
+            return;
+        }
+
+        $this->passwordChannel = 'auto';
+        $this->confirmingPasswordGeneration = true;
+    }
+
+    public function generatePassword(CustomerPasswordService $service): void
+    {
+        if (! $this->person || ! $this->person->exists) {
+            return;
+        }
+
+        $this->authorize('generatePassword', $this->person);
+
+        $result = $service->generateAndSendForPerson($this->person, $this->passwordChannel, auth()->user());
+
+        $this->confirmingPasswordGeneration = false;
+        $this->generatedPasswordNotice = "Password for {$this->person->full_name}: {$result['password']}";
+        session()->flash('password_success', $result['message']);
+    }
+
     public function attachHousehold(): void
     {
-        if (!$this->person || !$this->person->exists) {
+        if (! $this->person || ! $this->person->exists) {
             return;
         }
 
@@ -148,7 +207,7 @@ class Form extends Component
         ]);
 
         $this->person->households()->syncWithoutDetaching([
-            $this->selectedHouseholdId => ['role' => $this->householdRole]
+            $this->selectedHouseholdId => ['role' => $this->householdRole],
         ]);
 
         $this->reset(['selectedHouseholdId']);
@@ -164,7 +223,7 @@ class Form extends Component
 
     public function detachHousehold(): void
     {
-        if (!$this->person || !$this->person->exists) {
+        if (! $this->person || ! $this->person->exists) {
             return;
         }
 

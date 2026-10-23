@@ -19,6 +19,16 @@
             </div>
         @endif
 
+        @if ($generatedPasswordNotice)
+            <div class="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-800 rounded-md flex justify-between items-center">
+                <div>
+                    <strong class="font-bold">Generated Credentials:</strong>
+                    <span class="ml-2 font-mono text-sm bg-white px-2 py-1 rounded border">{{ $generatedPasswordNotice }}</span>
+                </div>
+                <button wire:click="$set('generatedPasswordNotice', null)" class="text-blue-600 hover:text-blue-800 font-bold">&times;</button>
+            </div>
+        @endif
+
         <!-- Search and Filters -->
         <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -93,6 +103,12 @@
                                 {{ $person->joined_at ? $person->joined_at->format('Y-m-d') : '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                @can('generatePassword', $person)
+                                    <button wire:click="confirmGeneratePassword({{ $person->id }})" title="Generate & Send Password" class="text-emerald-600 hover:text-emerald-900 font-semibold">
+                                        🔑 Pass
+                                    </button>
+                                @endcan
+
                                 @can('update', $person)
                                     <a href="{{ route('people.edit', $person) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                 @else
@@ -120,7 +136,34 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Confirmation Modal for Password Generation -->
+    @if ($confirmingPasswordGeneration)
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Generate & Send Password</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    This will generate a unique secure login password for this person, update/create their user account, and send credentials.
+                </p>
+
+                <div class="mb-6">
+                    <label for="passwordChannel" class="block text-xs font-semibold text-gray-700 uppercase mb-1">Delivery Channel</label>
+                    <select id="passwordChannel" wire:model="passwordChannel" class="w-full rounded-md border-gray-300 shadow-sm text-sm px-3 py-2 border">
+                        <option value="auto">Auto (Preferred contact method)</option>
+                        <option value="email">Email Only</option>
+                        <option value="sms">SMS Only</option>
+                        <option value="both">Both Email & SMS</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button wire:click="$set('confirmingPasswordGeneration', false)" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md">Cancel</button>
+                    <button wire:click="generatePassword" class="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-md font-semibold">Generate & Send</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Deletion Confirmation Modal -->
     @if ($confirmingDeletion)
         <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50">
             <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">

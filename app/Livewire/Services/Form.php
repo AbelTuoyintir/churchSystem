@@ -3,6 +3,7 @@
 namespace App\Livewire\Services;
 
 use App\Models\Service;
+use Illuminate\Support\Carbon;
 use Livewire\Component;
 
 class Form extends Component
@@ -10,9 +11,13 @@ class Form extends Component
     public ?Service $service = null;
 
     public string $name = '';
+
     public int $day_of_week = 0;
+
     public string $start_time = '09:00';
+
     public string $location = '';
+
     public bool $is_active = true;
 
     public function mount(?Service $service = null): void
@@ -23,12 +28,12 @@ class Form extends Component
 
             $this->name = $service->name ?? '';
             $this->day_of_week = (int) $service->day_of_week;
-            $this->start_time = $service->start_time ? \Illuminate\Support\Carbon::parse($service->start_time)->format('H:i') : '09:00';
+            $this->start_time = $service->start_time ? Carbon::parse($service->start_time)->format('H:i') : '09:00';
             $this->location = $service->location ?? '';
             $this->is_active = (bool) $service->is_active;
         } else {
             $this->authorize('create', Service::class);
-            $this->service = new Service();
+            $this->service = new Service;
         }
     }
 
