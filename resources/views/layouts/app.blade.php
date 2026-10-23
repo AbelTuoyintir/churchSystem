@@ -56,7 +56,7 @@
                 </a>
 
                 <!-- Mobile Close Button -->
-                <button @click="mobileSidebarOpen = false" class="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none">
+                <button @click="mobileSidebarOpen = false" aria-label="Close navigation menu" class="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -178,7 +178,7 @@
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" title="Log Out" class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-gray-800 transition">
+                        <button type="submit" title="Log Out" aria-label="Log Out" class="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         </button>
                     </form>
@@ -195,7 +195,9 @@
                     <!-- Mobile Hamburger Button -->
                     <button type="button" 
                             @click="mobileSidebarOpen = true"
-                            class="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
+                            :aria-expanded="mobileSidebarOpen"
+                            aria-label="Open navigation menu"
+                            class="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -217,8 +219,9 @@
                     <!-- Push Notification Bell -->
                     <button type="button" 
                             @click="togglePush()" 
+                            aria-label="Toggle push notifications"
                             :title="pushSubscribed ? 'Push Notifications are Active (Click to test)' : 'Click to Enable Push Notifications'"
-                            class="relative p-2 rounded-lg transition"
+                            class="relative p-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             :class="pushSubscribed ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -228,7 +231,7 @@
 
                     <!-- User Dropdown Menu -->
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 p-1.5 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-none">
+                        <button @click="open = !open" :aria-expanded="open" aria-haspopup="true" aria-label="User account menu" class="flex items-center gap-2 p-1.5 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
                                 {{ strtoupper(substr(auth()->user()?->name ?? 'U', 0, 1)) }}
                             </div>
