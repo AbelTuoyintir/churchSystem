@@ -9,26 +9,26 @@ class GroupPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader', 'viewer']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer']) || $user->isLeader();
     }
 
     public function view(User $user, Group $group): bool
     {
-        return in_array($user->role, ['admin', 'staff', 'leader', 'viewer']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer']) || $user->isLeader();
     }
 
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 
     public function update(User $user, Group $group): bool
     {
-        if (in_array($user->role, ['admin', 'staff'])) {
+        if (in_array($user->role, ['admin', 'pastor', 'staff'])) {
             return true;
         }
 
-        if ($user->role === 'leader') {
+        if ($user->isLeader()) {
             return $user->person_id !== null && $group->leader_id !== null && (int) $user->person_id === (int) $group->leader_id;
         }
 
@@ -37,6 +37,6 @@ class GroupPolicy
 
     public function delete(User $user, Group $group): bool
     {
-        return in_array($user->role, ['admin', 'staff']);
+        return in_array($user->role, ['admin', 'pastor', 'staff']);
     }
 }

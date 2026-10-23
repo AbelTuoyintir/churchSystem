@@ -81,20 +81,40 @@ class SendMessageJob implements ShouldQueue
                 'status' => 'pending',
             ]);
 
-            // TODO: Call $sender->send($this->message, $recipient) to send message via email/SMS provider
-            $sent = $sender->send($this->message, $recipient);
+                $sent = $sender->send($this->message, $recipient);
 
-            if ($sent) {
-                $recipient->update([
-                    'status' => 'sent',
-                    'sent_at' => now(),
-                ]);
-            } else {
-                $recipient->update([
-                    'status' => 'failed',
-                    'error' => 'Failed to send message via provider.',
-                ]);
+                if ($sent) {
+                    $recipient->update([
+                        'status' => 'sent',
+                        'sent_at' => now(),
+                    ]);
+                } else {
+                    $recipient->update([
+                        'status' => 'failed',
+                        'error' => $recipient->error ?? 'Failed to send message via provider.',
+                    ]);
+                }
             }
+        }
+
+        // Trigger Push Notification to church members
+        try {
+            $pushService = app(\App\Services\PushNotificationService::class);
+            $pushTitle = $this->message->subject ?: 'New Church Announcement';
+            $pushBody = \Illuminate\Support\Str::limit(strip_tags($this->message->body), 120);
+
+            if (!empty($filter['group_id'])) {
+                $group = \App\Models\Group::find($filter['group_id']);
+                if ($group) {
+                    $pushService->sendToGroup($group, $pushTitle, $pushBody, route('messages.show', $this->message));
+                } else {
+                    $pushService->sendToAll($pushTitle, $pushBody, route('messages.show', $this->message));
+                }
+            } else {
+                $pushService->sendToAll($pushTitle, $pushBody, route('messages.show', $this->message));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::info('Push notification dispatch note: ' . $e->getMessage());
         }
 
         $this->message->update([

@@ -10,6 +10,7 @@ class Contribution extends Model
     protected $fillable = [
         'person_id',
         'fund_id',
+        'pledge_id',
         'amount',
         'contributed_on',
         'method',
@@ -33,6 +34,11 @@ class Contribution extends Model
     public function fund(): BelongsTo
     {
         return $this->belongsTo(Fund::class);
+    }
+
+    public function pledge(): BelongsTo
+    {
+        return $this->belongsTo(Pledge::class);
     }
 
     public function recordedBy(): BelongsTo
