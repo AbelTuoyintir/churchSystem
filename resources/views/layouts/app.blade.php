@@ -162,7 +162,7 @@
                     </a>
                     @endcan
                 </div>
-                @endif
+              
             </nav>
 
             <!-- User Footer in Sidebar -->
@@ -171,7 +171,7 @@
                 <div class="flex items-center justify-between">
                     <div class="truncate mr-2">
                         <p class="font-bold text-sm text-gray-200 truncate">{{ auth()->user()->name }}</p>
-                        <span class="inline-block px-2 py-0.5 mt-0.5 rounded text-[10px] font-semibold tracking-wide capitalize {{ $isAdminOrPastor ? 'bg-indigo-900/80 text-indigo-200 border border-indigo-700/50' : 'bg-gray-800 text-gray-300' }}">
+                        <span class="inline-block px-2 py-0.5 mt-0.5 rounded text-[10px] font-semibold tracking-wide capitalize {{ auth()->user()->isAdmin() ? 'bg-indigo-900/80 text-indigo-200 border border-indigo-700/50' : 'bg-gray-800 text-gray-300' }}">
                             {{ auth()->user()->role }}
                         </span>
                     </div>
