@@ -38,7 +38,9 @@
         </div>
 
         <!-- Sidebar Navigation (Desktop persistent, Mobile drawer) -->
-        <aside class="fixed md:static inset-y-0 left-0 z-50 w-72 bg-gray-900 text-white flex flex-col shrink-0 min-h-screen transform md:transform-none transition-transform duration-300 ease-in-out"
+        <aside id="mobile-sidebar"
+               aria-label="Sidebar navigation"
+               class="fixed md:static inset-y-0 left-0 z-50 w-72 bg-gray-900 text-white flex flex-col shrink-0 min-h-screen transform md:transform-none transition-transform duration-300 ease-in-out"
                :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
 
             <!-- Sidebar Header / Logo -->
@@ -129,6 +131,15 @@
                         Attendance
                     </a>
                     @endcan
+
+                    @can('viewAny', App\Models\Message::class)
+                    <a href="{{ route('messages.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-xl transition {{ request()->routeIs('messages.*') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                        <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        Messages
+                    </a>
+                    @endcan
                 </div>
 
                 <!-- 5. FINANCIAL MANAGEMENT (ADMIN / PASTOR ONLY - STRICTLY HIDDEN FROM MEMBERS) -->
@@ -196,6 +207,7 @@
                     <button type="button" 
                             @click="mobileSidebarOpen = true"
                             :aria-expanded="mobileSidebarOpen"
+                            aria-controls="mobile-sidebar"
                             aria-label="Open navigation menu"
                             class="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,6 +232,7 @@
                     <button type="button" 
                             @click="togglePush()" 
                             aria-label="Toggle push notifications"
+                            :aria-pressed="pushSubscribed ? 'true' : 'false'"
                             :title="pushSubscribed ? 'Push Notifications are Active (Click to test)' : 'Click to Enable Push Notifications'"
                             class="relative p-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             :class="pushSubscribed ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'">
@@ -252,7 +265,7 @@
                                 My Profile
                             </a>
                             <a href="{{ route('giving.my') }}" class="block px-4 py-2 text-xs text-gray-700 hover:bg-gray-50">
-                                My Contributions &amp; Pledges
+                                My Giving Statement
                             </a>
 
                             <div class="border-t border-gray-100 my-1"></div>
