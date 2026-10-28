@@ -23,7 +23,7 @@
                     <strong class="font-bold">Generated Credentials:</strong>
                     <span class="ml-2 font-mono text-sm bg-white px-2 py-1 rounded border">{{ $generatedPasswordNotice }}</span>
                 </div>
-                <button wire:click="$set('generatedPasswordNotice', null)" class="text-blue-600 hover:text-blue-800 font-bold">&times;</button>
+                <button wire:click="$set('generatedPasswordNotice', null)" aria-label="Dismiss notice" class="text-blue-600 hover:text-blue-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1">&times;</button>
             </div>
         @endif
 

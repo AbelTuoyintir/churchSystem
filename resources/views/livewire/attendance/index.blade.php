@@ -119,7 +119,7 @@
                                 <tr>
                                     @can('create', App\Models\Attendance::class)
                                         <th class="px-4 py-3 text-left w-10">
-                                            <input type="checkbox" wire:model.live="selectAll" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4">
+                                            <input type="checkbox" wire:model.live="selectAll" aria-label="Select all attendance records" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4">
                                         </th>
                                     @endcan
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Person</th>
@@ -236,7 +236,7 @@
                     <h3 class="text-lg font-bold text-gray-900">
                         {{ $editingAttendanceId ? 'Edit Attendance Record' : 'Record Attendance' }}
                     </h3>
-                    <button wire:click="closeFormModal" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                    <button wire:click="closeFormModal" aria-label="Close modal" class="text-gray-400 hover:text-gray-600 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded p-1">&times;</button>
                 </div>
 
                 <form wire:submit.prevent="saveAttendance">
