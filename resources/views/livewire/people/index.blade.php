@@ -25,7 +25,7 @@
                     <strong class="font-bold">Generated Credentials:</strong>
                     <span class="ml-2 font-mono text-sm bg-white px-2 py-1 rounded border">{{ $generatedPasswordNotice }}</span>
                 </div>
-                <button wire:click="$set('generatedPasswordNotice', null)" class="text-blue-600 hover:text-blue-800 font-bold">&times;</button>
+                <button type="button" wire:click="$set('generatedPasswordNotice', null)" aria-label="Dismiss credential notice" class="text-blue-600 hover:text-blue-800 font-bold p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">&times;</button>
             </div>
         @endif
 
@@ -104,7 +104,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 @can('generatePassword', $person)
-                                    <button wire:click="confirmGeneratePassword({{ $person->id }})" title="Generate & Send Password" class="text-emerald-600 hover:text-emerald-900 font-semibold">
+                                    <button type="button" wire:click="confirmGeneratePassword({{ $person->id }})" title="Generate & Send Password" aria-label="Generate & Send Password for {{ $person->first_name }} {{ $person->last_name }}" class="text-emerald-600 hover:text-emerald-900 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-1">
                                         🔑 Pass
                                     </button>
                                 @endcan
