@@ -61,7 +61,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         DB::listen(function (QueryExecuted $query): void {
-            app(AuditLogger::class)->recordQuery($query);
+            try {
+                app(AuditLogger::class)->recordQuery($query);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         });
 
         Gate::policy(Person::class, PersonPolicy::class);
