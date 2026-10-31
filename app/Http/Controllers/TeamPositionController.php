@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeamPosition;
+use App\Models\Team;
 use Illuminate\Http\Request;
 
 class TeamPositionController extends Controller
@@ -12,6 +13,8 @@ class TeamPositionController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Team::class);
+
         return response()->json(TeamPosition::query()->with('team')->latest()->get());
     }
 
@@ -20,6 +23,8 @@ class TeamPositionController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Team::class);
+
         return response()->json(['message' => 'Create form not implemented yet.']);
     }
 
@@ -35,6 +40,8 @@ class TeamPositionController extends Controller
             'slots_per_service' => ['nullable', 'integer'],
         ]);
 
+        $this->authorize('create', Team::class);
+
         $position = TeamPosition::create($validated);
 
         return response()->json($position, 201);
@@ -45,6 +52,8 @@ class TeamPositionController extends Controller
      */
     public function show(TeamPosition $teamPosition)
     {
+        $this->authorize('view', $teamPosition->team);
+
         return response()->json($teamPosition->load(['team', 'members', 'assignments']));
     }
 
@@ -53,6 +62,8 @@ class TeamPositionController extends Controller
      */
     public function edit(TeamPosition $teamPosition)
     {
+        $this->authorize('update', $teamPosition->team);
+
         return response()->json(['message' => 'Edit form not implemented yet.', 'teamPosition' => $teamPosition]);
     }
 
@@ -61,6 +72,8 @@ class TeamPositionController extends Controller
      */
     public function update(Request $request, TeamPosition $teamPosition)
     {
+        $this->authorize('update', $teamPosition->team);
+
         $validated = $request->validate([
             'team_id' => ['sometimes', 'integer', 'exists:teams,id'],
             'name' => ['sometimes', 'string', 'max:255'],
@@ -78,6 +91,8 @@ class TeamPositionController extends Controller
      */
     public function destroy(TeamPosition $teamPosition)
     {
+        $this->authorize('update', $teamPosition->team);
+
         $teamPosition->delete();
 
         return response()->json(null, 204);

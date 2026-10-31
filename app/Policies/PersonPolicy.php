@@ -9,16 +9,20 @@ class PersonPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer']);
+        return in_array($user->role, ['admin', 'pastor', 'staff', 'viewer'], true) || $user->isGroupLeader();
     }
 
     public function view(User $user, Person $person): bool
     {
-        if (in_array($user->role, ['admin', 'pastor', 'staff', 'leader', 'viewer'])) {
+        if (in_array($user->role, ['admin', 'pastor', 'staff', 'viewer'], true)) {
             return true;
         }
 
-        return $user->person_id !== null && (int) $user->person_id === (int) $person->id;
+        if ($user->person_id !== null && (int) $user->person_id === (int) $person->id) {
+            return true;
+        }
+
+        return false;
     }
 
     public function create(User $user): bool
@@ -28,7 +32,7 @@ class PersonPolicy
 
     public function update(User $user, Person $person): bool
     {
-        if (in_array($user->role, ['admin', 'staff'])) {
+        if (in_array($user->role, ['admin', 'pastor', 'staff'])) {
             return true;
         }
 

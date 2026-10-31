@@ -9,7 +9,7 @@
                     Send updates, reminders, and alerts to church members via SMS, Email, or both.
                 </p>
             </div>
-            <a href="{{ route('messages.index') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900">
+            <a href="{{ route($leaderPortal ? 'groups.lead.messages.index' : 'messages.index') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900">
                 &larr; Back to Broadcasts
             </a>
         </div>
@@ -160,7 +160,7 @@
 
             <!-- Action Buttons -->
             <div class="border-t border-gray-200 pt-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
-                <a href="{{ route('messages.index') }}" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 text-center">
+                <a href="{{ route($leaderPortal ? 'groups.lead.messages.index' : 'messages.index') }}" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 text-center">
                     Cancel
                 </a>
 

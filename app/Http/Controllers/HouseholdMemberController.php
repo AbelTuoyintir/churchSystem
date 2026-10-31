@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\HouseholdMember;
+use App\Models\Household;
 use Illuminate\Http\Request;
 
 class HouseholdMemberController extends Controller
@@ -12,6 +13,8 @@ class HouseholdMemberController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Household::class);
+
         return response()->json(HouseholdMember::query()->with(['household', 'person'])->latest()->get());
     }
 
@@ -20,6 +23,8 @@ class HouseholdMemberController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Household::class);
+
         return response()->json(['message' => 'Create form not implemented yet.']);
     }
 
@@ -34,6 +39,8 @@ class HouseholdMemberController extends Controller
             'role' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $this->authorize('update', Household::query()->findOrFail($validated['household_id']));
+
         $member = HouseholdMember::create($validated);
 
         return response()->json($member, 201);
@@ -44,6 +51,8 @@ class HouseholdMemberController extends Controller
      */
     public function show(HouseholdMember $householdMember)
     {
+        $this->authorize('view', $householdMember->household);
+
         return response()->json($householdMember->load(['household', 'person']));
     }
 
@@ -52,6 +61,8 @@ class HouseholdMemberController extends Controller
      */
     public function edit(HouseholdMember $householdMember)
     {
+        $this->authorize('update', $householdMember->household);
+
         return response()->json(['message' => 'Edit form not implemented yet.', 'householdMember' => $householdMember]);
     }
 
@@ -60,6 +71,8 @@ class HouseholdMemberController extends Controller
      */
     public function update(Request $request, HouseholdMember $householdMember)
     {
+        $this->authorize('update', $householdMember->household);
+
         $validated = $request->validate([
             'household_id' => ['sometimes', 'integer', 'exists:households,id'],
             'person_id' => ['sometimes', 'integer', 'exists:people,id'],
@@ -76,6 +89,8 @@ class HouseholdMemberController extends Controller
      */
     public function destroy(HouseholdMember $householdMember)
     {
+        $this->authorize('update', $householdMember->household);
+
         $householdMember->delete();
 
         return response()->json(null, 204);

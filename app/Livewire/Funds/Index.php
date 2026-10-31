@@ -19,6 +19,11 @@ class Index extends Component
         'isActive' => ['except' => ''],
     ];
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Fund::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();

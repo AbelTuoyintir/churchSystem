@@ -36,6 +36,7 @@ class Person extends Model
         'baptized_at',
         'email_opt_in',
         'sms_opt_in',
+        'directory_opt_in',
         'notes',
         'is_active',
     ];
@@ -46,6 +47,7 @@ class Person extends Model
         'baptized_at' => 'date',
         'email_opt_in' => 'boolean',
         'sms_opt_in' => 'boolean',
+        'directory_opt_in' => 'boolean',
         'is_active' => 'boolean',
     ];
 
@@ -74,6 +76,11 @@ class Person extends Model
     public function groupMemberships(): HasMany
     {
         return $this->hasMany(GroupMember::class);
+    }
+
+    public function groupJoinRequests(): HasMany
+    {
+        return $this->hasMany(GroupJoinRequest::class);
     }
 
     public function groups(): BelongsToMany

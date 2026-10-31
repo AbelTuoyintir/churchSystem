@@ -82,6 +82,13 @@
                             <span class="ml-2 text-sm text-gray-700 font-medium">Is Active</span>
                         </label>
                     </div>
+
+                    <div class="flex items-center mt-6">
+                        <label for="is_open" class="inline-flex items-center cursor-pointer">
+                            <input id="is_open" type="checkbox" wire:model="is_open" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <span class="ml-2 text-sm text-gray-700 font-medium">Accepting join requests</span>
+                        </label>
+                    </div>
                 </div>
 
                 @can($group && $group->exists ? 'update' : 'create', $group)
@@ -98,6 +105,16 @@
         @if ($group && $group->exists)
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
                 <h3 class="text-lg font-bold text-gray-900 border-b pb-3">Group Members</h3>
+
+                @if (auth()->user()->isGroupLeader())
+                    <nav class="flex flex-wrap gap-4 border-b border-gray-200 pb-4 text-sm font-semibold">
+                        <a href="{{ route('groups.lead.attendance', ['groupId' => $group->id]) }}" class="text-indigo-700 hover:text-indigo-900">Record attendance</a>
+                        <a href="{{ route('groups.lead.reports', ['groupId' => $group->id]) }}" class="text-indigo-700 hover:text-indigo-900">Group reports</a>
+                        <a href="{{ route('groups.lead.events', ['groupId' => $group->id]) }}" class="text-indigo-700 hover:text-indigo-900">Group events</a>
+                        <a href="{{ route('groups.lead.prayer-requests', ['groupId' => $group->id]) }}" class="text-indigo-700 hover:text-indigo-900">Prayer requests</a>
+                        <a href="{{ route('groups.lead.messages.create', ['group_id' => $group->id]) }}" class="text-indigo-700 hover:text-indigo-900">Send announcement</a>
+                    </nav>
+                @endif
 
                 @if (session()->has('member_success'))
                     <div class="p-3 bg-green-100 border border-green-400 text-green-700 text-sm rounded-md">
@@ -121,7 +138,9 @@
                         <div>
                             <label for="memberRole" class="block text-xs font-medium text-gray-700 mb-1">Role *</label>
                             <select id="memberRole" wire:model="memberRole" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm px-3 py-2 border">
-                                <option value="leader">Leader</option>
+                                @if (auth()->user()->isStaff())
+                                    <option value="leader">Leader</option>
+                                @endif
                                 <option value="co_leader">Co-Leader</option>
                                 <option value="member">Member</option>
                             </select>
@@ -148,6 +167,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined At</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -161,6 +181,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                                         {{ str_replace('_', ' ', $member->role) }}
                                     </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        <span class="block">{{ $member->person?->email ?: 'No email' }}</span>
+                                        <span class="block">{{ $member->person?->phone ?: 'No phone' }}</span>
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $member->joined_at ? \Illuminate\Support\Carbon::parse($member->joined_at)->format('Y-m-d') : '—' }}
                                     </td>
@@ -172,13 +196,36 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-6 text-center text-gray-500 text-sm">
+                                    <td colspan="5" class="px-6 py-6 text-center text-gray-500 text-sm">
                                         No active members attached to this group.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <div class="grid gap-8 border-t border-gray-200 pt-6 lg:grid-cols-2">
+                    <section>
+                        <h4 class="text-base font-bold text-gray-900">Group attendance history</h4>
+                        <div class="mt-3 divide-y divide-gray-200 border-y border-gray-200">
+                            @forelse ($recentAttendance->groupBy(fn ($attendance) => $attendance->attended_on->toDateString())->take(8) as $date => $records)
+                                <div class="flex justify-between gap-3 py-2 text-sm"><span class="text-gray-800">{{ \Illuminate\Support\Carbon::parse($date)->format('M j, Y') }}</span><span class="text-gray-600">{{ $records->where('status', 'present')->count() }} present · {{ $records->where('status', 'absent')->count() }} absent</span></div>
+                            @empty
+                                <p class="py-4 text-sm text-gray-600">No group attendance recorded.</p>
+                            @endforelse
+                        </div>
+                    </section>
+                    <section>
+                        <h4 class="text-base font-bold text-gray-900">Group prayer requests</h4>
+                        <div class="mt-3 divide-y divide-gray-200 border-y border-gray-200">
+                            @forelse ($groupPrayerRequests as $request)
+                                <article class="py-3"><p class="text-sm font-semibold text-gray-900">{{ $request->title ?: 'Prayer request' }}</p><p class="mt-1 text-sm text-gray-700">{{ $request->body }}</p><p class="mt-1 text-xs text-gray-500">{{ $request->person?->full_name ?? 'Anonymous' }} · {{ ucfirst($request->status) }}</p></article>
+                            @empty
+                                <p class="py-4 text-sm text-gray-600">No group prayer requests yet.</p>
+                            @endforelse
+                        </div>
+                    </section>
                 </div>
             </div>
         @endif

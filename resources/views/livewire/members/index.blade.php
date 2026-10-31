@@ -18,9 +18,7 @@
             <h2 class="text-2xl font-bold text-gray-800">
                 Welcome, {{ $person ? $person->full_name : $user->name }}!
             </h2>
-            <p class="text-sm text-gray-500 mt-1">
-                Member Portal - View your profile, family household, group memberships, serving assignments, and attendance history.
-            </p>
+                <p class="text-sm text-gray-500 mt-1">Your member record and contact preferences.</p>
         </div>
         <div class="flex items-center gap-3">
             <div class="inline-flex items-center px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-full capitalize">
@@ -33,6 +31,10 @@
             @endif
         </div>
     </div>
+
+    @if ($user?->isGroupLeader())
+        <livewire:groups.lead-overview />
+    @endif
 
     @if(!$person)
         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
@@ -55,9 +57,13 @@
             <div class="lg:col-span-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 font-bold text-2xl flex items-center justify-center shrink-0">
-                            {{ strtoupper(substr($person->first_name, 0, 1) . substr($person->last_name, 0, 1)) }}
-                        </div>
+                        @if ($person->photo_path)
+                            <img src="{{ Storage::disk('public')->url($person->photo_path) }}" alt="{{ $person->full_name }}" class="h-16 w-16 shrink-0 rounded-full object-cover">
+                        @else
+                            <div class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-700">
+                                {{ strtoupper(substr($person->first_name, 0, 1) . substr($person->last_name, 0, 1)) }}
+                            </div>
+                        @endif
                         <div>
                             <h3 class="text-lg font-bold text-gray-900">{{ $person->full_name }}</h3>
                             <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
@@ -83,6 +89,10 @@
                                 <span class="text-gray-900">{{ $person->preferred_name }}</span>
                             </div>
                         @endif
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Full Name</span>
+                            <span class="text-gray-900">{{ trim(implode(' ', array_filter([$person->first_name, $person->middle_name, $person->last_name]))) }}</span>
+                        </div>
                         <div>
                             <span class="block text-xs font-semibold text-gray-500 uppercase">Email</span>
                             <span class="text-gray-900">{{ $person->email ?: 'N/A' }}</span>
@@ -114,9 +124,34 @@
                             <span class="text-gray-900">{{ $person->date_of_birth ? $person->date_of_birth->format('M d, Y') : 'N/A' }}</span>
                         </div>
                         <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Gender / Marital Status</span>
+                            <span class="text-gray-900">{{ $person->gender ?: 'N/A' }} / {{ $person->marital_status ?: 'N/A' }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Membership Status</span>
+                            <span class="text-gray-900 capitalize">{{ $person->membership_status ?: 'N/A' }}</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Joined / Baptized</span>
+                            <span class="text-gray-900">
+                                {{ $person->joined_at?->format('M d, Y') ?? 'Not recorded' }} /
+                                {{ $person->baptized_at?->format('M d, Y') ?? 'Not recorded' }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase">Account Status</span>
+                            <span class="text-gray-900">{{ $person->is_active ? 'Active' : 'Inactive' }}</span>
+                        </div>
+                        @if ($person->notes)
+                            <div>
+                                <span class="block text-xs font-semibold text-gray-500 uppercase">Notes</span>
+                                <span class="text-gray-900">{{ $person->notes }}</span>
+                            </div>
+                        @endif
+                        <div>
                             <span class="block text-xs font-semibold text-gray-500 uppercase">Communication Preferences</span>
                             <span class="text-gray-900 text-xs">
-                                Email: {{ $person->email_opt_in ? 'Subscribed' : 'Opted Out' }} | SMS: {{ $person->sms_opt_in ? 'Subscribed' : 'Opted Out' }}
+                                Email: {{ $person->email_opt_in ? 'On' : 'Off' }} | SMS: {{ $person->sms_opt_in ? 'On' : 'Off' }} | Directory: {{ $person->directory_opt_in ? 'On' : 'Off' }}
                             </span>
                         </div>
                     </div>
@@ -126,6 +161,12 @@
                             <label class="block text-xs font-semibold text-gray-600 uppercase">Preferred Name</label>
                             <input type="text" wire:model="preferred_name" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             @error('preferred_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Email</label>
+                            <input type="email" wire:model="email" class="mt-1 w-full rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @error('email') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
@@ -172,6 +213,22 @@
                         </div>
 
                         <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase">Country</label>
+                            <input type="text" wire:model="country" class="mt-1 w-full rounded border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @error('country') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="photo" class="block text-xs font-semibold text-gray-600 uppercase">Profile Photo</label>
+                            <input id="photo" type="file" wire:model="photo" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-gray-700">
+                            @error('photo') <span class="text-xs text-red-600">{{ $message }}</span> @enderror
+                            <div wire:loading wire:target="photo" class="text-xs text-gray-500">Uploading photo...</div>
+                            @if ($photo)
+                                <img src="{{ $photo->temporaryUrl() }}" alt="Photo preview" class="mt-2 h-16 w-16 rounded-full object-cover">
+                            @endif
+                        </div>
+
+                        <div>
                             <label class="block text-xs font-semibold text-gray-600 uppercase">Date of Birth</label>
                             <input type="date" wire:model="date_of_birth" class="w-full mt-1 px-3 py-1.5 border border-gray-300 rounded text-sm focus:ring-indigo-500 focus:border-indigo-500">
                             @error('date_of_birth') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -187,6 +244,10 @@
                                 <label class="inline-flex items-center text-xs text-gray-700">
                                     <input type="checkbox" wire:model="sms_opt_in" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4 mr-1.5">
                                     Receive SMS
+                                </label>
+                                <label class="inline-flex items-center text-xs text-gray-700">
+                                    <input type="checkbox" wire:model="directory_opt_in" class="mr-1.5 h-4 w-4 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                    Show contact details in member directory
                                 </label>
                             </div>
                         </div>
@@ -213,6 +274,7 @@
                         </svg>
                         Household & Family
                     </h3>
+                    <a href="{{ route('members.household') }}" class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Open my household</a>
 
                     @if($person->households->isEmpty())
                         <p class="text-sm text-gray-500 italic">No household currently associated.</p>
@@ -250,7 +312,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             @foreach($person->groups as $group)
                                 <div class="border rounded-md p-4 bg-gray-50 space-y-1">
-                                    <div class="font-semibold text-gray-900">{{ $group->name }}</div>
+                                    <a href="{{ route('members.groups.show', $group) }}" class="font-semibold text-gray-900 hover:text-indigo-700">{{ $group->name }}</a>
                                     <div class="text-xs text-gray-500 capitalize">Role: {{ $group->pivot->role ?? 'member' }}</div>
                                     @if($group->meeting_day || $group->meeting_time)
                                         <div class="text-xs text-gray-600">

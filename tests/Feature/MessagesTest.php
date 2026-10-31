@@ -5,6 +5,8 @@ use App\Jobs\SendMessageJob;
 use App\Livewire\Messages\Form as MessagesForm;
 use App\Livewire\Messages\Index as MessagesIndex;
 use App\Livewire\Messages\Show as MessagesShow;
+use App\Models\Group;
+use App\Models\GroupMember;
 use App\Models\Message;
 use App\Models\MessageRecipient;
 use App\Models\Person;
@@ -214,5 +216,92 @@ test('leader and viewer are blocked from creating or sending messages', function
     Livewire::actingAs($leader)
         ->test(MessagesIndex::class)
         ->call('sendNow', $message->id)
+        ->assertForbidden();
+});
+
+test('member group leader can only message their own group and sees only their own history', function () {
+    $leaderPerson = Person::factory()->create();
+    $leader = User::factory()->create(['role' => 'member', 'person_id' => $leaderPerson->id]);
+    $group = Group::factory()->create(['leader_id' => $leaderPerson->id]);
+    $otherGroup = Group::factory()->create();
+    $recipient = Person::factory()->create(['email_opt_in' => true, 'email' => 'group@example.com']);
+    GroupMember::query()->create([
+        'group_id' => $group->id,
+        'person_id' => $recipient->id,
+        'role' => 'member',
+        'joined_at' => now()->toDateString(),
+    ]);
+    $privateMessage = Message::query()->create([
+        'subject' => 'My group update',
+        'body' => 'For our group only',
+        'channel' => 'email',
+        'status' => 'draft',
+        'audience_filter' => ['target_audience' => 'group', 'group_id' => $group->id],
+        'created_by' => $leader->id,
+    ]);
+    $otherMessage = Message::query()->create([
+        'subject' => 'Another leader update',
+        'body' => 'Private to another leader',
+        'channel' => 'email',
+        'status' => 'sent',
+        'audience_filter' => ['target_audience' => 'group', 'group_id' => $otherGroup->id],
+        'created_by' => User::factory()->create(['role' => 'leader'])->id,
+    ]);
+
+    Livewire::actingAs($leader)
+        ->test(MessagesForm::class)
+        ->set('target_audience', 'group')
+        ->set('group_id', (string) $group->id)
+        ->set('subject', 'Group update')
+        ->set('body', 'Only our group')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    Livewire::actingAs($leader)
+        ->test(MessagesForm::class)
+        ->set('target_audience', 'group')
+        ->set('group_id', (string) $otherGroup->id)
+        ->set('subject', 'Wrong audience')
+        ->set('body', 'Should not be saved')
+        ->call('save')
+        ->assertForbidden();
+
+    Livewire::actingAs($leader)
+        ->test(MessagesForm::class)
+        ->set('target_audience', 'church')
+        ->set('group_id', (string) $group->id)
+        ->set('subject', 'Church-wide')
+        ->set('body', 'Should not be sent')
+        ->call('sendNow')
+        ->assertForbidden();
+
+    Livewire::actingAs($leader)
+        ->test(MessagesIndex::class)
+        ->assertSee($privateMessage->subject)
+        ->assertDontSee($otherMessage->subject);
+});
+
+test('group leader cannot alter the audience or send a group with no active recipients', function () {
+    $person = Person::factory()->create();
+    $leader = User::factory()->create(['role' => 'member', 'person_id' => $person->id]);
+    $group = Group::factory()->create(['leader_id' => $person->id]);
+    $formerMember = Person::factory()->create(['email_opt_in' => true, 'email' => 'former@example.com']);
+    GroupMember::query()->create([
+        'group_id' => $group->id,
+        'person_id' => $formerMember->id,
+        'role' => 'member',
+        'joined_at' => now()->subMonths(2)->toDateString(),
+        'left_at' => now()->subDay()->toDateString(),
+    ]);
+
+    Livewire::actingAs($leader)
+        ->test(MessagesForm::class)
+        ->set('target_audience', 'group')
+        ->set('group_id', (string) $group->id)
+        ->assertSee('0 recipients')
+        ->set('target_audience', 'church')
+        ->set('subject', 'Not a group message')
+        ->set('body', 'Must stay scoped')
+        ->call('save')
         ->assertForbidden();
 });

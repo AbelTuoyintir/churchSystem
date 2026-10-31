@@ -3,14 +3,18 @@
 namespace App\Jobs;
 
 use App\Contracts\MessageSender;
+use App\Models\Group;
 use App\Models\Message;
 use App\Models\MessageRecipient;
 use App\Models\Person;
+use App\Services\PushNotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class SendMessageJob implements ShouldQueue
 {
@@ -28,6 +32,14 @@ class SendMessageJob implements ShouldQueue
         $this->message->update(['status' => 'sending']);
 
         $filter = $this->message->audience_filter ?? [];
+        $isGroupAudience = data_get($filter, 'target_audience') === 'group' || ! empty($filter['group_id']);
+
+        if ($isGroupAudience && empty($filter['group_id'])) {
+            $this->message->update(['status' => 'failed']);
+
+            return;
+        }
+
         $query = Person::query();
 
         if ($this->message->channel === 'email') {
@@ -46,7 +58,8 @@ class SendMessageJob implements ShouldQueue
 
         if (! empty($filter['group_id'])) {
             $query->whereHas('groups', function ($q) use ($filter) {
-                $q->where('groups.id', $filter['group_id']);
+                $q->where('groups.id', $filter['group_id'])
+                    ->whereNull('group_members.left_at');
             });
         }
 
@@ -81,40 +94,37 @@ class SendMessageJob implements ShouldQueue
                 'status' => 'pending',
             ]);
 
-                $sent = $sender->send($this->message, $recipient);
+            $sent = $sender->send($this->message, $recipient);
 
-                if ($sent) {
-                    $recipient->update([
-                        'status' => 'sent',
-                        'sent_at' => now(),
-                    ]);
-                } else {
-                    $recipient->update([
-                        'status' => 'failed',
-                        'error' => $recipient->error ?? 'Failed to send message via provider.',
-                    ]);
-                }
+            if ($sent) {
+                $recipient->update([
+                    'status' => 'sent',
+                    'sent_at' => now(),
+                ]);
+            } else {
+                $recipient->update([
+                    'status' => 'failed',
+                    'error' => $recipient->error ?? 'Failed to send message via provider.',
+                ]);
             }
         }
 
         // Trigger Push Notification to church members
         try {
-            $pushService = app(\App\Services\PushNotificationService::class);
+            $pushService = app(PushNotificationService::class);
             $pushTitle = $this->message->subject ?: 'New Church Announcement';
-            $pushBody = \Illuminate\Support\Str::limit(strip_tags($this->message->body), 120);
+            $pushBody = Str::limit(strip_tags($this->message->body), 120);
 
-            if (!empty($filter['group_id'])) {
-                $group = \App\Models\Group::find($filter['group_id']);
+            if ($isGroupAudience) {
+                $group = Group::find($filter['group_id']);
                 if ($group) {
                     $pushService->sendToGroup($group, $pushTitle, $pushBody, route('messages.show', $this->message));
-                } else {
-                    $pushService->sendToAll($pushTitle, $pushBody, route('messages.show', $this->message));
                 }
             } else {
                 $pushService->sendToAll($pushTitle, $pushBody, route('messages.show', $this->message));
             }
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::info('Push notification dispatch note: ' . $e->getMessage());
+            Log::info('Push notification dispatch note: '.$e->getMessage());
         }
 
         $this->message->update([
