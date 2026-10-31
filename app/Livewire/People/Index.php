@@ -2,14 +2,20 @@
 
 namespace App\Livewire\People;
 
+use App\Models\Group;
+use App\Models\GroupMember;
 use App\Models\Person;
 use App\Services\CustomerPasswordService;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Index extends Component
 {
     use WithPagination;
+
+    #[Locked]
+    public bool $leaderPortal = false;
 
     public string $search = '';
 
@@ -35,6 +41,12 @@ class Index extends Component
         'membershipStatus' => ['except' => ''],
         'isActive' => ['except' => ''],
     ];
+
+    public function mount(): void
+    {
+        $this->leaderPortal = request()->routeIs('groups.lead.directory');
+        abort_unless(! $this->leaderPortal || auth()->user()->isGroupLeader(), 403);
+    }
 
     public function updatingSearch(): void
     {
@@ -95,14 +107,39 @@ class Index extends Component
     {
         $this->authorize('viewAny', Person::class);
 
+        $user = auth()->user();
+        $limitedDirectory = $this->leaderPortal || ($user->isGroupLeader() && ! $user->isStaff());
+        $fullContactPersonIds = collect();
+
+        if ($limitedDirectory) {
+            $ledGroups = Group::query()->ledBy($user);
+            $fullContactPersonIds = GroupMember::query()
+                ->whereIn('group_id', $ledGroups->select('groups.id'))
+                ->whereNull('left_at')
+                ->pluck('person_id')
+                ->merge($ledGroups->pluck('leader_id'))
+                ->unique();
+        }
+
         $people = Person::query()
             ->with('user')
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
+            ->when($this->search !== '', function ($query) use ($limitedDirectory, $fullContactPersonIds): void {
+                $query->where(function ($q) use ($limitedDirectory, $fullContactPersonIds): void {
                     $q->where('first_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('last_name', 'like', '%'.$this->search.'%')
-                        ->orWhere('email', 'like', '%'.$this->search.'%')
-                        ->orWhere('phone', 'like', '%'.$this->search.'%');
+                        ->orWhere('last_name', 'like', '%'.$this->search.'%');
+
+                    if ($limitedDirectory) {
+                        $q->orWhere(function ($contactQuery) use ($fullContactPersonIds): void {
+                            $contactQuery->whereIn('people.id', $fullContactPersonIds)
+                                ->where(function ($query): void {
+                                    $query->where('email', 'like', '%'.$this->search.'%')
+                                        ->orWhere('phone', 'like', '%'.$this->search.'%');
+                                });
+                        });
+                    } else {
+                        $q->orWhere('email', 'like', '%'.$this->search.'%')
+                            ->orWhere('phone', 'like', '%'.$this->search.'%');
+                    }
                 });
             })
             ->when($this->membershipStatus !== '', function ($query) {
@@ -117,6 +154,8 @@ class Index extends Component
 
         return view('livewire.people.index', [
             'people' => $people,
+            'limitedDirectory' => $limitedDirectory,
+            'fullContactPersonIds' => $fullContactPersonIds,
         ])->layout('layouts.app');
     }
 }

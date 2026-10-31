@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeamMember;
+use App\Models\Team;
 use Illuminate\Http\Request;
 
 class TeamMemberController extends Controller
@@ -12,6 +13,8 @@ class TeamMemberController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Team::class);
+
         return response()->json(TeamMember::query()->with(['team', 'person', 'position'])->latest()->get());
     }
 
@@ -20,6 +23,8 @@ class TeamMemberController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Team::class);
+
         return response()->json(['message' => 'Create form not implemented yet.']);
     }
 
@@ -36,6 +41,8 @@ class TeamMemberController extends Controller
             'left_at' => ['nullable', 'date'],
         ]);
 
+        $this->authorize('create', Team::query()->findOrFail($validated['team_id']));
+
         $teamMember = TeamMember::create($validated);
 
         return response()->json($teamMember, 201);
@@ -46,6 +53,8 @@ class TeamMemberController extends Controller
      */
     public function show(TeamMember $teamMember)
     {
+        $this->authorize('view', $teamMember->team);
+
         return response()->json($teamMember->load(['team', 'person', 'position']));
     }
 
@@ -54,6 +63,8 @@ class TeamMemberController extends Controller
      */
     public function edit(TeamMember $teamMember)
     {
+        $this->authorize('update', $teamMember->team);
+
         return response()->json(['message' => 'Edit form not implemented yet.', 'teamMember' => $teamMember]);
     }
 
@@ -62,6 +73,8 @@ class TeamMemberController extends Controller
      */
     public function update(Request $request, TeamMember $teamMember)
     {
+        $this->authorize('update', $teamMember->team);
+
         $validated = $request->validate([
             'team_id' => ['sometimes', 'integer', 'exists:teams,id'],
             'person_id' => ['sometimes', 'integer', 'exists:people,id'],
@@ -80,6 +93,8 @@ class TeamMemberController extends Controller
      */
     public function destroy(TeamMember $teamMember)
     {
+        $this->authorize('update', $teamMember->team);
+
         $teamMember->delete();
 
         return response()->json(null, 204);

@@ -29,6 +29,11 @@ class Index extends Component
         'method' => ['except' => ''],
     ];
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Contribution::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();

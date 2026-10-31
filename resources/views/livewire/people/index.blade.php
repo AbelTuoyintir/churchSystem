@@ -25,7 +25,7 @@
                     <strong class="font-bold">Generated Credentials:</strong>
                     <span class="ml-2 font-mono text-sm bg-white px-2 py-1 rounded border">{{ $generatedPasswordNotice }}</span>
                 </div>
-                <button type="button" wire:click="$set('generatedPasswordNotice', null)" aria-label="Dismiss notice" class="text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1 font-bold">&times;</button>
+                <button wire:click="$set('generatedPasswordNotice', null)" aria-label="Dismiss notice" class="text-blue-600 hover:text-blue-800 font-bold">&times;</button>
             </div>
         @endif
 
@@ -79,10 +79,18 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $person->email ?: '—' }}
+                                @if (! $limitedDirectory || $fullContactPersonIds->contains($person->id))
+                                    {{ $person->email ?: '—' }}
+                                @else
+                                    —
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $person->phone ?: '—' }}
+                                @if (! $limitedDirectory || $fullContactPersonIds->contains($person->id))
+                                    {{ $person->phone ?: '—' }}
+                                @else
+                                    —
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 @if ($person->membership_status === 'member')
@@ -104,14 +112,14 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 @can('generatePassword', $person)
-                                    <button type="button" wire:click="confirmGeneratePassword({{ $person->id }})" title="Generate & Send Password" aria-label="Generate and send password for {{ $person->first_name }} {{ $person->last_name }}" class="text-emerald-600 hover:text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-1 font-semibold">
+                                    <button wire:click="confirmGeneratePassword({{ $person->id }})" title="Generate & Send Password" aria-label="Generate & Send Password" class="text-emerald-600 hover:text-emerald-900 font-semibold">
                                         🔑 Pass
                                     </button>
                                 @endcan
 
                                 @can('update', $person)
                                     <a href="{{ route('people.edit', $person) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                @else
+                                @elseif (! $limitedDirectory && auth()->user()->can('view', $person))
                                     <a href="{{ route('people.edit', $person) }}" class="text-gray-600 hover:text-gray-900">View</a>
                                 @endcan
 
