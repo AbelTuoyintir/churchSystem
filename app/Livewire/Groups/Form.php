@@ -5,6 +5,7 @@ namespace App\Livewire\Groups;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\Person;
+use App\Models\PrayerRequest;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
 
@@ -27,6 +28,8 @@ class Form extends Component
     public string $location = '';
 
     public bool $is_active = true;
+
+    public bool $is_open = true;
 
     // Leader search property
     public string $leaderSearch = '';
@@ -58,6 +61,7 @@ class Form extends Component
             $this->meeting_time = $group->meeting_time ? Carbon::parse($group->meeting_time)->format('H:i') : '';
             $this->location = $group->location ?? '';
             $this->is_active = (bool) ($group->is_active ?? true);
+            $this->is_open = (bool) ($group->is_open ?? true);
         } else {
             $this->authorize('create', Group::class);
             $this->group = new Group;
@@ -75,6 +79,7 @@ class Form extends Component
             'meeting_time' => 'nullable',
             'location' => 'nullable|string|max:255',
             'is_active' => 'boolean',
+            'is_open' => 'boolean',
         ];
     }
 
@@ -87,7 +92,10 @@ class Form extends Component
         }
 
         $validated = $this->validate();
-        if (empty($validated['leader_id'])) {
+
+        if (! auth()->user()->isStaff()) {
+            unset($validated['leader_id'], $validated['is_active'], $validated['is_open']);
+        } elseif (empty($validated['leader_id'])) {
             $validated['leader_id'] = null;
         }
 
@@ -112,7 +120,7 @@ class Form extends Component
 
         $this->validate([
             'selectedPersonId' => 'required|exists:people,id',
-            'memberRole' => 'required|string|in:leader,co_leader,member',
+            'memberRole' => 'required|string|in:'.(auth()->user()->isStaff() ? 'leader,co_leader,member' : 'co_leader,member'),
             'joinedAt' => 'required|date',
         ]);
 
@@ -176,15 +184,27 @@ class Form extends Component
         $allPeople = $peopleQuery->get();
 
         $currentMembers = ($this->group && $this->group->exists)
-            ? GroupMember::with('person')
+            ? GroupMember::with('person:id,first_name,last_name,email,phone')
                 ->where('group_id', $this->group->id)
                 ->whereNull('left_at')
                 ->get()
             : collect();
 
+        $recentAttendance = ($this->group && $this->group->exists)
+            ? $this->group->attendances()->whereNull('service_id')->whereNull('event_id')
+                ->with('person:id,first_name,last_name')->latest('attended_on')->limit(30)->get()
+            : collect();
+
+        $groupPrayerRequests = ($this->group && $this->group->exists)
+            ? PrayerRequest::query()->where('group_id', $this->group->id)->where('scope', 'group')
+                ->with('person:id,first_name,last_name')->latest()->limit(20)->get()
+            : collect();
+
         return view('livewire.groups.form', [
             'allPeople' => $allPeople,
             'currentMembers' => $currentMembers,
+            'recentAttendance' => $recentAttendance,
+            'groupPrayerRequests' => $groupPrayerRequests,
         ])->layout('layouts.app');
     }
 }

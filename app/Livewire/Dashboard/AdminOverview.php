@@ -16,9 +16,9 @@ class AdminOverview extends Component
 
         $totalPeople = Person::count();
         $totalHouseholds = Household::count();
-        $totalGroups = Group::where('status', 'active')->count();
+        $totalGroups = Group::where('is_active', true)->count();
 
-        $canViewFinancials = in_array($user?->role, ['admin', 'staff']);
+        $canViewFinancials = in_array($user?->role, ['admin', 'pastor', 'staff']);
         $totalContributionsThisMonth = 0;
 
         if ($canViewFinancials) {

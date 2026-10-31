@@ -9,11 +9,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $user) {
+            $user->ensureDefaultRolesExist();
+        });
+
+        static::saved(function (self $user) {
+            $user->ensureDefaultRolesExist();
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -76,24 +89,34 @@ class User extends Authenticatable
         return $this->hasMany(PushSubscription::class);
     }
 
+    protected function ensureDefaultRolesExist(): void
+    {
+        foreach (['admin', 'pastor', 'steward', 'member', 'leader', 'staff', 'viewer'] as $roleName) {
+            Role::firstOrCreate([
+                'name' => $roleName,
+                'guard_name' => 'web',
+            ]);
+        }
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasRole('admin') || $this->role === 'admin';
     }
 
     public function isPastor(): bool
     {
-        return in_array($this->role, ['pastor', 'admin']);
+        return $this->hasRole(['pastor', 'admin']) || in_array($this->role, ['pastor', 'admin']);
     }
 
     public function isStaff(): bool
     {
-        return in_array($this->role, ['admin', 'pastor', 'staff']);
+        return $this->hasRole(['admin', 'pastor', 'steward', 'staff']) || in_array($this->role, ['admin', 'pastor', 'steward', 'staff']);
     }
 
     public function isLeader(): bool
     {
-        if (in_array($this->role, ['admin', 'pastor', 'staff', 'leader'])) {
+        if ($this->hasRole(['admin', 'pastor', 'steward', 'leader', 'staff']) || in_array($this->role, ['admin', 'pastor', 'steward', 'leader', 'staff'])) {
             return true;
         }
 
@@ -105,8 +128,34 @@ class User extends Authenticatable
         return false;
     }
 
+    public function isGroupLeader(): bool
+    {
+        return $this->person_id !== null && Group::query()->ledBy($this)->exists();
+    }
+
     public function isMember(): bool
     {
-        return $this->role === 'member';
+        return $this->hasRole('member') || $this->role === 'member';
+    }
+
+    public function syncLegacyRoleFromRoles(): void
+    {
+        $roleNames = $this->getRoleNames()->all();
+
+        if (empty($roleNames)) {
+            if ($this->role === null || $this->role === '') {
+                $this->role = 'member';
+            }
+
+            return;
+        }
+
+        $preferred = collect($roleNames)->first(fn (string $roleName): bool => in_array($roleName, ['admin', 'pastor', 'steward', 'member'], true));
+
+        $this->role = $preferred ?? $roleNames[0];
+
+        if ($this->exists) {
+            $this->saveQuietly();
+        }
     }
 }

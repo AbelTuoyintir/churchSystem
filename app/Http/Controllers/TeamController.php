@@ -12,6 +12,8 @@ class TeamController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Team::class);
+
         return response()->json(Team::query()->with('leader')->latest()->get());
     }
 
@@ -20,6 +22,8 @@ class TeamController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Team::class);
+
         return response()->json(['message' => 'Create form not implemented yet.']);
     }
 
@@ -28,10 +32,13 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Team::class);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'leader_id' => ['nullable', 'integer', 'exists:people,id'],
+            'group_id' => ['nullable', 'integer', 'exists:groups,id'],
             'is_active' => ['boolean'],
         ]);
 
@@ -45,6 +52,8 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
+        $this->authorize('view', $team);
+
         return response()->json($team->load(['leader', 'positions', 'members']));
     }
 
@@ -53,6 +62,8 @@ class TeamController extends Controller
      */
     public function edit(Team $team)
     {
+        $this->authorize('update', $team);
+
         return response()->json(['message' => 'Edit form not implemented yet.', 'team' => $team]);
     }
 
@@ -61,10 +72,13 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
+        $this->authorize('update', $team);
+
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'leader_id' => ['nullable', 'integer', 'exists:people,id'],
+            'group_id' => ['nullable', 'integer', 'exists:groups,id'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
@@ -78,6 +92,8 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
+        $this->authorize('delete', $team);
+
         $team->delete();
 
         return response()->json(null, 204);
