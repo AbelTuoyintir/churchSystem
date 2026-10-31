@@ -36,6 +36,7 @@ class CustomerPasswordService
                 'person_id' => $person->id,
                 'role' => 'member',
             ]);
+            $user->assignRole('member');
         }
 
         return $this->generateAndSendForUser($user, $channel, $createdBy);

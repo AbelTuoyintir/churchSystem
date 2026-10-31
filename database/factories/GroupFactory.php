@@ -23,6 +23,7 @@ class GroupFactory extends Factory
             'meeting_time' => '19:00',
             'location' => fake()->city(),
             'is_active' => true,
+            'is_open' => true,
         ];
     }
 }

@@ -41,6 +41,7 @@ class Index extends Component
                     'person_id' => $person->id,
                     'role' => 'member',
                 ]);
+                $user->assignRole('member');
             }
 
             Auth::login($user);
@@ -59,6 +60,7 @@ class Index extends Component
         }
 
         if ($persona === 'admin') {
+            $user->assignRole('admin');
             $user->role = 'admin';
             $user->save();
 
@@ -66,6 +68,7 @@ class Index extends Component
         }
 
         if ($persona === 'member') {
+            $user->assignRole('member');
             $user->role = 'member';
             $user->save();
 
@@ -73,6 +76,7 @@ class Index extends Component
         }
 
         if ($persona === 'leader') {
+            $user->assignRole('leader');
             $user->role = 'leader';
             $user->save();
 

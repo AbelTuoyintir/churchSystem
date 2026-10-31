@@ -79,10 +79,18 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $person->email ?: '—' }}
+                                @if (! $limitedDirectory || $fullContactPersonIds->contains($person->id))
+                                    {{ $person->email ?: '—' }}
+                                @else
+                                    —
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $person->phone ?: '—' }}
+                                @if (! $limitedDirectory || $fullContactPersonIds->contains($person->id))
+                                    {{ $person->phone ?: '—' }}
+                                @else
+                                    —
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 @if ($person->membership_status === 'member')
@@ -111,7 +119,7 @@
 
                                 @can('update', $person)
                                     <a href="{{ route('people.edit', $person) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                @else
+                                @elseif (! $limitedDirectory && auth()->user()->can('view', $person))
                                     <a href="{{ route('people.edit', $person) }}" class="text-gray-600 hover:text-gray-900">View</a>
                                 @endcan
 

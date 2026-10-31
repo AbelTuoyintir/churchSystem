@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,11 +22,13 @@ class Group extends Model
         'meeting_time',
         'location',
         'is_active',
+        'is_open',
     ];
 
     protected $casts = [
         'meeting_time' => 'datetime:H:i:s',
         'is_active' => 'boolean',
+        'is_open' => 'boolean',
     ];
 
     public function leader(): BelongsTo
@@ -48,5 +51,38 @@ class Group extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class);
+    }
+
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(GroupJoinRequest::class);
+    }
+
+    public function scopeLedBy(Builder $query, User $user): void
+    {
+        if ($user->person_id === null) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->where(function (Builder $query) use ($user): void {
+            $query->where('leader_id', $user->person_id)
+                ->orWhereHas('members', function (Builder $query) use ($user): void {
+                    $query->where('person_id', $user->person_id)
+                        ->where('role', 'leader')
+                        ->whereNull('left_at');
+                });
+        });
     }
 }

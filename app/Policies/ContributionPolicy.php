@@ -23,7 +23,7 @@ class ContributionPolicy
 
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pastor', 'staff', 'member']);
+        return in_array($user->role, ['admin', 'pastor', 'staff'], true);
     }
 
     public function update(User $user, Contribution $contribution): bool
