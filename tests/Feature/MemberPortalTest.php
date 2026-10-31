@@ -199,3 +199,48 @@ test('unlinked user cannot update profile in member portal', function () {
         ->call('updateProfile')
         ->assertSee('No linked profile found.');
 });
+
+test('member can view personal contributions and pledge progress on member portal', function () {
+    $person = Person::factory()->create([
+        'first_name' => 'Sarah',
+        'last_name' => 'Giver',
+    ]);
+
+    $user = User::factory()->create([
+        'person_id' => $person->id,
+        'role' => 'member',
+    ]);
+
+    $fund = Fund::create([
+        'name' => 'Mission Expansion Fund',
+    ]);
+
+    Contribution::create([
+        'person_id' => $person->id,
+        'fund_id' => $fund->id,
+        'amount' => 500.00,
+        'method' => 'online',
+        'contributed_on' => now()->toDateString(),
+        'note' => 'Mission pledge payment',
+    ]);
+
+    Pledge::create([
+        'person_id' => $person->id,
+        'fund_id' => $fund->id,
+        'amount' => 1000.00,
+        'frequency' => 'monthly',
+        'start_date' => now()->startOfYear()->toDateString(),
+        'end_date' => now()->endOfYear()->toDateString(),
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('members.index')
+        ->assertStatus(200)
+        ->assertSee('My Giving', false)
+        ->assertSee('Mission Expansion Fund')
+        ->assertSee('$500.00')
+        ->assertSee('My Pledges', false)
+        ->assertSee('Goal: $1,000.00')
+        ->assertSee('Raised: $500.00 (50%)');
+});
