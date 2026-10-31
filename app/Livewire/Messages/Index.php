@@ -3,7 +3,9 @@
 namespace App\Livewire\Messages;
 
 use App\Jobs\SendMessageJob;
+use App\Models\Group;
 use App\Models\Message;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,6 +20,14 @@ class Index extends Component
     public bool $confirmingSend = false;
 
     public ?int $messageIdBeingSent = null;
+
+    #[Locked]
+    public bool $leaderPortal = false;
+
+    public function mount(): void
+    {
+        $this->leaderPortal = request()->routeIs('groups.lead.messages.*');
+    }
 
     protected $queryString = [
         'channel' => ['except' => ''],
@@ -36,7 +46,7 @@ class Index extends Component
 
     public function confirmSend(int $id): void
     {
-        $message = Message::findOrFail($id);
+        $message = $this->messagesQuery()->findOrFail($id);
         $this->authorize('send', $message);
 
         $this->messageIdBeingSent = $id;
@@ -50,7 +60,7 @@ class Index extends Component
             return;
         }
 
-        $message = Message::findOrFail($messageId);
+        $message = $this->messagesQuery()->findOrFail($messageId);
         $this->authorize('send', $message);
 
         $message->update(['status' => 'sending']);
@@ -67,7 +77,8 @@ class Index extends Component
     {
         $this->authorize('create', Message::class);
 
-        $original = Message::findOrFail($id);
+        $original = $this->messagesQuery()->findOrFail($id);
+        $this->authorize('view', $original);
 
         $duplicate = Message::create([
             'subject' => $original->subject ? 'Copy of '.$original->subject : 'Copy of Message',
@@ -81,22 +92,39 @@ class Index extends Component
         ]);
 
         session()->flash('success', 'Message duplicated.');
-        $this->redirect(route('messages.edit', $duplicate));
+        $route = $this->leaderPortal ? 'groups.lead.messages.edit' : 'messages.edit';
+        $this->redirect(route($route, $duplicate));
     }
 
     public function render()
     {
         $this->authorize('viewAny', Message::class);
 
-        $messages = Message::query()
+        $user = auth()->user();
+        $messagesQuery = $this->messagesQuery()
             ->withCount('recipients')
             ->when($this->channel !== '', fn ($q) => $q->where('channel', $this->channel))
-            ->when($this->status !== '', fn ($q) => $q->where('status', $this->status))
-            ->latest()
-            ->paginate(15);
+            ->when($this->status !== '', fn ($q) => $q->where('status', $this->status));
+
+        $messages = $messagesQuery->latest()->paginate(15);
 
         return view('livewire.messages.index', [
             'messages' => $messages,
+            'leaderPortal' => $this->leaderPortal,
         ])->layout('layouts.app');
+    }
+
+    private function messagesQuery()
+    {
+        $user = auth()->user();
+        $query = Message::query();
+
+        if ($this->leaderPortal || ($user->isGroupLeader() && ! $user->isStaff())) {
+            $query->where('created_by', $user->id)
+                ->where('audience_filter->target_audience', 'group')
+                ->whereIn('audience_filter->group_id', Group::query()->ledBy($user)->select('id'));
+        }
+
+        return $query;
     }
 }

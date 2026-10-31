@@ -12,6 +12,8 @@ class AssignmentController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Assignment::class);
+
         return response()->json(Assignment::query()->with(['team', 'position', 'person', 'service', 'event'])->latest()->get());
     }
 
@@ -20,6 +22,8 @@ class AssignmentController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Assignment::class);
+
         return response()->json(['message' => 'Create form not implemented yet.']);
     }
 
@@ -28,6 +32,8 @@ class AssignmentController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Assignment::class);
+
         $validated = $request->validate([
             'team_id' => ['required', 'integer', 'exists:teams,id'],
             'position_id' => ['nullable', 'integer', 'exists:team_positions,id'],
@@ -50,6 +56,8 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
+        $this->authorize('view', $assignment);
+
         return response()->json($assignment->load(['team', 'position', 'person', 'service', 'event']));
     }
 
@@ -58,6 +66,8 @@ class AssignmentController extends Controller
      */
     public function edit(Assignment $assignment)
     {
+        $this->authorize('update', $assignment);
+
         return response()->json(['message' => 'Edit form not implemented yet.', 'assignment' => $assignment]);
     }
 
@@ -66,6 +76,8 @@ class AssignmentController extends Controller
      */
     public function update(Request $request, Assignment $assignment)
     {
+        $this->authorize('update', $assignment);
+
         $validated = $request->validate([
             'team_id' => ['sometimes', 'integer', 'exists:teams,id'],
             'position_id' => ['nullable', 'integer', 'exists:team_positions,id'],
@@ -88,6 +100,8 @@ class AssignmentController extends Controller
      */
     public function destroy(Assignment $assignment)
     {
+        $this->authorize('delete', $assignment);
+
         $assignment->delete();
 
         return response()->json(null, 204);

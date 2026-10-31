@@ -18,6 +18,7 @@ test('admin or staff can view create group form and create a group', function ()
         ->set('leader_id', $leader->id)
         ->set('meeting_day', 'Friday')
         ->set('meeting_time', '18:00')
+        ->set('is_open', false)
         ->call('save')
         ->assertRedirect(route('groups.index'));
 
@@ -26,6 +27,7 @@ test('admin or staff can view create group form and create a group', function ()
         'type' => 'ministry',
         'leader_id' => $leader->id,
         'meeting_day' => 'Friday',
+        'is_open' => false,
     ]);
 });
 
@@ -84,11 +86,31 @@ test('leader cannot edit another leaders group', function () {
     $user = User::factory()->create(['role' => 'leader', 'person_id' => $leaderPerson1->id]);
     $otherGroup = Group::factory()->create(['leader_id' => $leaderPerson2->id]);
 
-    Livewire::actingAs($user)
-        ->test(Form::class, ['group' => $otherGroup])
-        ->set('name', 'Hacked Group Name')
-        ->call('save')
+    $this->actingAs($user)
+        ->get(route('groups.edit', $otherGroup))
         ->assertForbidden();
+});
+
+test('member group leader can edit a pivot-led group without changing its leader assignment', function () {
+    $leaderPerson = Person::factory()->create();
+    $user = User::factory()->create(['role' => 'member', 'person_id' => $leaderPerson->id]);
+    $group = Group::factory()->create(['leader_id' => null]);
+    $group->members()->create([
+        'person_id' => $leaderPerson->id,
+        'role' => 'leader',
+        'joined_at' => now()->toDateString(),
+    ]);
+    $otherPerson = Person::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Form::class, ['group' => $group])
+        ->set('name', 'Updated by member leader')
+        ->set('leader_id', $otherPerson->id)
+        ->call('save')
+        ->assertRedirect(route('groups.index'));
+
+    expect($group->fresh()->leader_id)->toBeNull()
+        ->and($group->fresh()->name)->toBe('Updated by member leader');
 });
 
 test('viewer is forbidden from creating or updating a group', function () {
