@@ -12,6 +12,8 @@ class MessageRecipientController extends Controller
      */
     public function index()
     {
+        $this->authorizeStaff();
+
         return response()->json(MessageRecipient::query()->with(['message', 'person'])->latest()->get());
     }
 
@@ -20,6 +22,8 @@ class MessageRecipientController extends Controller
      */
     public function create()
     {
+        $this->authorizeStaff();
+
         return response()->json(['message' => 'Create form not implemented yet.']);
     }
 
@@ -28,6 +32,8 @@ class MessageRecipientController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorizeStaff();
+
         $validated = $request->validate([
             'message_id' => ['required', 'integer', 'exists:messages,id'],
             'person_id' => ['required', 'integer', 'exists:people,id'],
@@ -48,6 +54,8 @@ class MessageRecipientController extends Controller
      */
     public function show(MessageRecipient $messageRecipient)
     {
+        $this->authorizeStaff();
+
         return response()->json($messageRecipient->load(['message', 'person']));
     }
 
@@ -56,6 +64,8 @@ class MessageRecipientController extends Controller
      */
     public function edit(MessageRecipient $messageRecipient)
     {
+        $this->authorizeStaff();
+
         return response()->json(['message' => 'Edit form not implemented yet.', 'messageRecipient' => $messageRecipient]);
     }
 
@@ -64,6 +74,8 @@ class MessageRecipientController extends Controller
      */
     public function update(Request $request, MessageRecipient $messageRecipient)
     {
+        $this->authorizeStaff();
+
         $validated = $request->validate([
             'message_id' => ['sometimes', 'integer', 'exists:messages,id'],
             'person_id' => ['sometimes', 'integer', 'exists:people,id'],
@@ -84,8 +96,15 @@ class MessageRecipientController extends Controller
      */
     public function destroy(MessageRecipient $messageRecipient)
     {
+        $this->authorizeStaff();
+
         $messageRecipient->delete();
 
         return response()->json(null, 204);
+    }
+
+    private function authorizeStaff(): void
+    {
+        abort_unless(in_array(auth()->user()?->role, ['admin', 'pastor', 'staff'], true), 403);
     }
 }

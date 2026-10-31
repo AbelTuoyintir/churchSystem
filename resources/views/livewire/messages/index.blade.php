@@ -5,7 +5,7 @@
                 Messages
             </h2>
             @can('create', App\Models\Message::class)
-            <a href="{{ route('messages.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+            <a href="{{ route($leaderPortal ? 'groups.lead.messages.create' : 'messages.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
                 New Message
             </a>
             @endcan
@@ -60,7 +60,7 @@
                     @forelse($messages as $message)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                <a href="{{ route('messages.show', $message) }}" class="text-indigo-600 hover:text-indigo-900">
+                                <a href="{{ route($leaderPortal ? 'groups.lead.messages.show' : 'messages.show', $message) }}" class="text-indigo-600 hover:text-indigo-900">
                                     {{ $message->subject ?: '(No Subject)' }}
                                 </a>
                             </td>
@@ -87,11 +87,11 @@
                                 {{ $message->sent_at ? $message->sent_at->format('M j, Y g:i A') : '—' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <a href="{{ route('messages.show', $message) }}" class="text-gray-600 hover:text-gray-900">View</a>
+                                <a href="{{ route($leaderPortal ? 'groups.lead.messages.show' : 'messages.show', $message) }}" class="text-gray-600 hover:text-gray-900">View</a>
 
                                 @can('update', $message)
                                     @if($message->status === 'draft')
-                                        <a href="{{ route('messages.edit', $message) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                        <a href="{{ route($leaderPortal ? 'groups.lead.messages.edit' : 'messages.edit', $message) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                     @endif
                                 @endcan
 

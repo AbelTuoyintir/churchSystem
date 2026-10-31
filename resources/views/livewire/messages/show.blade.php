@@ -7,12 +7,12 @@
             <div class="space-x-2">
                 @can('update', $message)
                     @if($message->status === 'draft')
-                        <a href="{{ route('messages.edit', $message) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                        <a href="{{ route($leaderPortal ? 'groups.lead.messages.edit' : 'messages.edit', $message) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
                             Edit Message
                         </a>
                     @endif
                 @endcan
-                <a href="{{ route('messages.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                <a href="{{ route($leaderPortal ? 'groups.lead.messages.index' : 'messages.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
                     Back to Messages
                 </a>
             </div>

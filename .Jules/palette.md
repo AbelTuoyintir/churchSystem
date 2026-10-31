@@ -1,3 +1,3 @@
-## 2026-10-23 - ARIA accessibility on mobile sidebar drawers and icon dismiss buttons
-**Learning:** In Blade/Alpine responsive layouts, drawer sidebars need explicit `id` and `aria-label` linkage with the hamburger button (`aria-controls`, `:aria-expanded`) and icon-only dismiss buttons (`&times;`) require descriptive `aria-label` attributes for screen readers.
-**Action:** Always verify mobile drawer triggers and alert close buttons have matching ARIA relationships (`aria-controls`, `:aria-expanded`, `aria-label`).
+## 2026-10-30 - ARIA Labels for Icon-Only and Symbol-Based Action Buttons
+**Learning:** Symbol-only buttons (`&times;` close buttons) and emoji-based action buttons (like `🔑 Pass`) lack readable text for assistive technologies. Adding explicit `aria-label` and `:aria-expanded` attributes ensures screen readers properly convey button intent.
+**Action:** Always verify icon-only and symbol-based interactive elements in Blade views and add explicit `aria-label` descriptions.

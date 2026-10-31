@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Dashboard\AdminOverview;
 use App\Models\Assignment;
 use App\Models\Attendance;
 use App\Models\Contribution;
@@ -87,11 +88,26 @@ test('dashboard redirects member role to member-portal', function () {
 
 test('dashboard renders dashboard view for admin role', function () {
     $user = User::factory()->create(['role' => 'admin']);
+    Group::factory()->create(['is_active' => true]);
+    Group::factory()->create(['is_active' => false]);
 
     $this->actingAs($user)
         ->get('/dashboard')
-        ->assertStatus(200)
-        ->assertSee('Dashboard');
+        ->assertOk()
+        ->assertSee('Dashboard')
+        ->assertSee('Active Groups')
+        ->assertSeeHtml('text-3xl font-extrabold text-gray-900 mt-1">1</p>');
+});
+
+test('dashboard overview counts only active groups', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    Group::factory()->count(2)->create(['is_active' => true]);
+    Group::factory()->create(['is_active' => false]);
+
+    Livewire::actingAs($user)
+        ->test(AdminOverview::class)
+        ->assertSee('Active Groups')
+        ->assertSeeHtml('text-3xl font-extrabold text-gray-900 mt-1">2</p>');
 });
 
 test('member can view personal contributions and pledges in member portal', function () {

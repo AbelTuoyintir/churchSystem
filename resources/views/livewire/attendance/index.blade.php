@@ -236,7 +236,7 @@
                     <h3 class="text-lg font-bold text-gray-900">
                         {{ $editingAttendanceId ? 'Edit Attendance Record' : 'Record Attendance' }}
                     </h3>
-                    <button wire:click="closeFormModal" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+                    <button wire:click="closeFormModal" aria-label="Close modal" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
                 </div>
 
                 <form wire:submit.prevent="saveAttendance">
