@@ -23,6 +23,11 @@ class Index extends Component
         'frequency' => ['except' => ''],
     ];
 
+    public function mount(): void
+    {
+        $this->authorize('viewAny', Pledge::class);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();

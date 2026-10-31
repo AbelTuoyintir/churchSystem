@@ -49,6 +49,7 @@ class Index extends Component
 
     public function markInactive(): void
     {
+        abort_unless(auth()->user()->isStaff(), 403);
         $group = Group::findOrFail($this->groupIdBeingInactivated);
         $this->authorize('update', $group);
 
@@ -64,9 +65,10 @@ class Index extends Component
     {
         $this->authorize('viewAny', Group::class);
 
-        $groups = Group::query()
+        $user = auth()->user();
+        $query = Group::query()
             ->with('leader')
-            ->withCount('members')
+            ->withCount(['members' => fn ($members) => $members->whereNull('left_at')])
             ->when($this->search !== '', function ($query) {
                 $query->where('name', 'like', '%'.$this->search.'%');
             })
@@ -75,9 +77,13 @@ class Index extends Component
             })
             ->when($this->isActive !== '', function ($query) {
                 $query->where('is_active', filter_var($this->isActive, FILTER_VALIDATE_BOOLEAN));
-            })
-            ->orderBy('name', 'asc')
-            ->paginate(25);
+            });
+
+        if ($user->isGroupLeader() && ! $user->isStaff()) {
+            $query->ledBy($user);
+        }
+
+        $groups = $query->orderBy('name', 'asc')->paginate(25);
 
         return view('livewire.groups.index', [
             'groups' => $groups,

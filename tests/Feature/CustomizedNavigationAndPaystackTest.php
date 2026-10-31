@@ -14,6 +14,8 @@ test('member cannot access admin financial routes', function () {
     $member = User::factory()->create(['role' => 'member']);
     $fund = Fund::create(['name' => 'General Fund']);
 
+    expect($member->can('viewAny', Fund::class))->toBeFalse();
+
     $this->actingAs($member)->get('/funds')->assertForbidden();
     $this->actingAs($member)->get('/contributions')->assertForbidden();
     $this->actingAs($member)->get('/contributions/create')->assertForbidden();

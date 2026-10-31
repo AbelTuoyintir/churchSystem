@@ -17,6 +17,7 @@ use App\Models\TeamPosition;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,6 +26,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        foreach (['admin', 'pastor', 'steward', 'member', 'leader', 'staff', 'viewer'] as $roleName) {
+            Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+        }
+
         // Password for all seeded users
         $password = Hash::make('password');
 
@@ -45,6 +50,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
             'person_id' => $adminPerson->id,
         ]);
+        $adminUser->assignRole('admin');
 
         $staffPerson = Person::create([
             'first_name' => 'Staff',
@@ -62,6 +68,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'staff',
             'person_id' => $staffPerson->id,
         ]);
+        $staffUser->assignRole('staff');
 
         $leaderPerson = Person::create([
             'first_name' => 'Leader',
@@ -79,6 +86,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'leader',
             'person_id' => $leaderPerson->id,
         ]);
+        $leaderUser->assignRole('leader');
 
         $memberPerson = Person::create([
             'first_name' => 'Jane',
@@ -104,6 +112,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'member',
             'person_id' => $memberPerson->id,
         ]);
+        $memberUser->assignRole('member');
 
         $viewerPerson = Person::create([
             'first_name' => 'Viewer',
@@ -121,6 +130,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'viewer',
             'person_id' => $viewerPerson->id,
         ]);
+        $viewerUser->assignRole('viewer');
 
         // 2. Create Household
         $household = Household::create([

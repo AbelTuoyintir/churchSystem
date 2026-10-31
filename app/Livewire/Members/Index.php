@@ -3,15 +3,22 @@
 namespace App\Livewire\Members;
 
 use App\Models\Person;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class Index extends Component
 {
+    use WithFileUploads;
+
     public bool $isEditing = false;
 
     public bool $editingProfile = false;
 
     public ?string $preferred_name = null;
+
+    public string $email = '';
 
     public ?string $phone = null;
 
@@ -27,16 +34,31 @@ class Index extends Component
 
     public ?string $postal_code = null;
 
+    public ?string $country = null;
+
     public ?string $date_of_birth = null;
 
     public bool $email_opt_in = true;
 
     public bool $sms_opt_in = true;
 
+    public bool $directory_opt_in = false;
+
+    public $photo;
+
     protected function rules(): array
     {
+        $personId = auth()->user()?->person_id;
+
         return [
             'preferred_name' => 'nullable|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('people', 'email')->ignore($personId),
+                Rule::unique('users', 'email')->ignore(auth()->id()),
+            ],
             'phone' => 'nullable|string|max:20',
             'alternate_phone' => 'nullable|string|max:20',
             'address_line1' => 'nullable|string|max:255',
@@ -44,9 +66,12 @@ class Index extends Component
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
             'date_of_birth' => 'nullable|date',
             'email_opt_in' => 'boolean',
             'sms_opt_in' => 'boolean',
+            'directory_opt_in' => 'boolean',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
     }
 
@@ -62,6 +87,7 @@ class Index extends Component
             $person = Person::find($user->person_id);
             if ($person) {
                 $this->preferred_name = $person->preferred_name;
+                $this->email = $person->email ?: $user->email;
                 $this->phone = $person->phone;
                 $this->alternate_phone = $person->alternate_phone;
                 $this->address_line1 = $person->address_line1;
@@ -69,9 +95,11 @@ class Index extends Component
                 $this->city = $person->city;
                 $this->state = $person->state;
                 $this->postal_code = $person->postal_code;
+                $this->country = $person->country;
                 $this->date_of_birth = $person->date_of_birth ? $person->date_of_birth->format('Y-m-d') : null;
                 $this->email_opt_in = (bool) $person->email_opt_in;
                 $this->sms_opt_in = (bool) $person->sms_opt_in;
+                $this->directory_opt_in = (bool) $person->directory_opt_in;
             }
         }
     }
@@ -107,7 +135,7 @@ class Index extends Component
             return;
         }
 
-        $person = Person::find($user->person_id);
+        $person = $user->person;
 
         if (! $person) {
             session()->flash('error', 'Person profile not found.');
@@ -116,8 +144,25 @@ class Index extends Component
         }
 
         $validated = $this->validate();
+        $photo = $validated['photo'] ?? null;
+        unset($validated['photo']);
+
+        $previousPhotoPath = $person->photo_path;
+        if ($photo) {
+            $validated['photo_path'] = $photo->store('people/photos', 'public');
+        }
 
         $person->update($validated);
+
+        if ($user->email !== $person->email) {
+            $user->email = $person->email;
+            $user->email_verified_at = null;
+            $user->save();
+        }
+
+        if ($photo && $previousPhotoPath) {
+            Storage::disk('public')->delete($previousPhotoPath);
+        }
 
         $this->isEditing = false;
         $this->editingProfile = false;
@@ -134,7 +179,7 @@ class Index extends Component
             $person = Person::query()
                 ->with([
                     'households.people',
-                    'groups',
+                    'groups' => fn ($query) => $query->wherePivotNull('left_at'),
                     'assignments.team',
                     'assignments.position',
                     'assignments.service',

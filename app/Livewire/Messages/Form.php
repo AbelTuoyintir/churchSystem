@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\Message;
 use App\Models\Person;
 use App\Models\Team;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Form extends Component
@@ -23,6 +24,7 @@ class Form extends Component
 
     // Audience selection: 'church' or 'group'
     public string $target_audience = 'church';
+
     public string $membership_status = '';
 
     public string $group_id = '';
@@ -35,12 +37,23 @@ class Form extends Component
 
     public bool $canBroadcastToChurch = true;
 
+    #[Locked]
+    public bool $leaderPortal = false;
+
     public function mount(?Message $message = null): void
     {
         $user = auth()->user();
-        $this->canBroadcastToChurch = $user ? ($user->isAdmin() || $user->isPastor() || $user->role === 'staff') : false;
+        $this->leaderPortal = request()->routeIs('groups.lead.messages.*');
+        $this->canBroadcastToChurch = $user && ! $this->leaderPortal
+            ? ($user->isAdmin() || $user->isPastor() || $user->role === 'staff')
+            : false;
 
-        if (!$this->canBroadcastToChurch) {
+        if (! $this->canBroadcastToChurch) {
+            $this->target_audience = 'group';
+        }
+
+        if (request()->query('group_id') !== null) {
+            $this->group_id = (string) request()->query('group_id');
             $this->target_audience = 'group';
         }
 
@@ -54,12 +67,16 @@ class Form extends Component
             $this->scheduled_at = $message->scheduled_at ? $message->scheduled_at->format('Y-m-d\TH:i') : null;
 
             $filter = $message->audience_filter ?? [];
-            $this->target_audience = $filter['target_audience'] ?? (!empty($filter['group_id']) ? 'group' : 'church');
+            $this->target_audience = $filter['target_audience'] ?? (! empty($filter['group_id']) ? 'group' : 'church');
             $this->membership_status = $filter['membership_status'] ?? '';
             $this->group_id = isset($filter['group_id']) ? (string) $filter['group_id'] : '';
             $this->team_id = isset($filter['team_id']) ? (string) $filter['team_id'] : '';
             $this->email_opt_in = ! empty($filter['email_opt_in']);
             $this->sms_opt_in = ! empty($filter['sms_opt_in']);
+
+            if ($this->leaderPortal) {
+                $this->enforceLeaderAudience();
+            }
         } else {
             $this->authorize('create', Message::class);
             $this->message = new Message;
@@ -73,9 +90,9 @@ class Form extends Component
             'body' => ['required', 'string'],
             'channel' => ['required', 'in:email,sms,both'],
             'scheduled_at' => ['nullable', 'date'],
-            'target_audience' => ['required', 'in:church,group'],
+            'target_audience' => ['required', $this->canBroadcastToChurch() ? 'in:church,group' : 'in:group'],
             'membership_status' => ['nullable', 'string'],
-            'group_id' => [$this->target_audience === 'group' ? 'required' : 'nullable', 'string'],
+            'group_id' => [$this->target_audience === 'group' ? 'required' : 'nullable', 'integer', 'exists:groups,id'],
             'team_id' => ['nullable', 'string'],
             'email_opt_in' => ['boolean'],
             'sms_opt_in' => ['boolean'],
@@ -105,8 +122,12 @@ class Form extends Component
         }
 
         if ($this->target_audience === 'group' && $this->group_id !== '') {
+            if (! $this->canBroadcastToChurch() && ! Group::query()->ledBy(auth()->user())->whereKey($this->group_id)->exists()) {
+                return 0;
+            }
+
             $query->whereHas('groups', function ($q) {
-                $q->where('groups.id', $this->group_id);
+                $q->where('groups.id', $this->group_id)->whereNull('group_members.left_at');
             });
         }
 
@@ -159,6 +180,8 @@ class Form extends Component
 
     public function save(): void
     {
+        $this->enforceLeaderAudience();
+
         if ($this->message && $this->message->exists) {
             $this->authorize('update', $this->message);
         } else {
@@ -177,11 +200,13 @@ class Form extends Component
             session()->flash('success', 'Broadcast created successfully.');
         }
 
-        $this->redirect(route('messages.index'));
+        $this->redirect(route($this->leaderPortal ? 'groups.lead.messages.index' : 'messages.index'));
     }
 
     public function sendNow(): void
     {
+        $this->enforceLeaderAudience();
+
         if ($this->message && $this->message->exists) {
             $this->authorize('update', $this->message);
         } else {
@@ -206,7 +231,7 @@ class Form extends Component
         SendMessageJob::dispatch($msg);
 
         session()->flash('success', 'Broadcast sent successfully to members!');
-        $this->redirect(route('messages.index'));
+        $this->redirect(route($this->leaderPortal ? 'groups.lead.messages.index' : 'messages.index'));
     }
 
     public function render()
@@ -214,12 +239,8 @@ class Form extends Component
         $user = auth()->user();
         $groupsQuery = Group::query()->where('is_active', true)->orderBy('name');
 
-        // If user is a leader without church-wide permission, restrict to groups they lead
-        if (!$this->canBroadcastToChurch && $user && $user->person_id) {
-            $groupsQuery->where(function ($q) use ($user) {
-                $q->where('leader_id', $user->person_id)
-                  ->orWhereHas('members', fn($mq) => $mq->where('people.id', $user->person_id)->where('group_members.role', 'leader'));
-            });
+        if (! $this->canBroadcastToChurch() && $user) {
+            $groupsQuery->ledBy($user);
         }
 
         $groups = $groupsQuery->get();
@@ -229,6 +250,37 @@ class Form extends Component
             'groups' => $groups,
             'teams' => $teams,
             'matchingCount' => $this->matchingPeopleCount,
+            'leaderPortal' => $this->leaderPortal,
         ])->layout('layouts.app', ['header' => 'New Church Broadcast']);
+    }
+
+    private function enforceLeaderAudience(): void
+    {
+        if ($this->canBroadcastToChurch()) {
+            return;
+        }
+
+        abort_unless($this->target_audience === 'group', 403);
+        abort_unless($this->group_id !== '' && Group::query()
+            ->ledBy(auth()->user())
+            ->whereKey($this->group_id)
+            ->exists(), 403);
+
+        if ($this->message?->exists && $this->isGroupLeaderPortal()) {
+            abort_unless((int) $this->message->created_by === (int) auth()->id(), 403);
+        }
+    }
+
+    private function canBroadcastToChurch(): bool
+    {
+        $user = auth()->user();
+
+        return ! $this->isGroupLeaderPortal()
+            && ($user->isAdmin() || $user->isPastor() || $user->role === 'staff');
+    }
+
+    private function isGroupLeaderPortal(): bool
+    {
+        return $this->leaderPortal;
     }
 }
