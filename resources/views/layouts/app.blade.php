@@ -38,6 +38,10 @@
       x-init="initApp()"
       @keydown.escape.window="mobileSidebarOpen = false">
 
+<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-indigo-600 focus:text-white focus:text-sm focus:font-semibold focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    Skip to main content
+</a>
+
 @php
     // Shared link styling so every nav item stays consistent
     $linkBase   = 'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900';
@@ -474,7 +478,7 @@
         </header>
 
         {{-- Page content --}}
-        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main id="main-content" tabindex="-1" class="flex-1 px-4 py-6 sm:px-6 lg:px-8 focus:outline-none">
             <div class="mx-auto w-full max-w-7xl space-y-6">
 
                 {{-- Flash messages --}}
