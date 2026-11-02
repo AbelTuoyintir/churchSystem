@@ -24,6 +24,18 @@ test('admin sees full navigation menu including financial links', function () {
     $response->assertSee('User Personas');
 });
 
+test('layout renders accessible skip to main content link targeting main element', function () {
+    $person = Person::factory()->create();
+    $user = User::factory()->create(['person_id' => $person->id, 'role' => 'member']);
+
+    $response = $this->actingAs($user)->get('/member-portal');
+
+    $response->assertStatus(200);
+    $response->assertSee('href="#main-content"', false);
+    $response->assertSee('Skip to main content');
+    $response->assertSee('id="main-content"', false);
+});
+
 test('leader sees operational navigation menu but not financial links', function () {
     $person = Person::factory()->create();
     $leader = User::factory()->create(['person_id' => $person->id, 'role' => 'leader']);
