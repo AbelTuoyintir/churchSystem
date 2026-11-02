@@ -134,7 +134,7 @@
                                     <tr class="hover:bg-gray-50">
                                         @can('create', App\Models\Attendance::class)
                                             <td class="px-4 py-3 whitespace-nowrap">
-                                                <input type="checkbox" value="{{ $attendance->id }}" wire:model.live="selectedAttendanceIds" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4">
+                                                <input type="checkbox" value="{{ $attendance->id }}" wire:model.live="selectedAttendanceIds" aria-label="Select attendance for {{ $attendance->person ? $attendance->person->full_name : 'Anonymous record' }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4">
                                             </td>
                                         @endcan
                                         <td class="px-4 py-3 whitespace-nowrap">
@@ -184,7 +184,7 @@
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-start gap-3">
                                     @can('create', App\Models\Attendance::class)
-                                        <input type="checkbox" value="{{ $attendance->id }}" wire:model.live="selectedAttendanceIds" class="mt-1 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4">
+                                        <input type="checkbox" value="{{ $attendance->id }}" wire:model.live="selectedAttendanceIds" aria-label="Select attendance for {{ $attendance->person ? $attendance->person->full_name : 'Anonymous record' }}" class="mt-1 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 h-4 w-4">
                                     @endcan
                                     <div>
                                         <div class="text-sm font-semibold text-gray-900">
@@ -230,10 +230,10 @@
 
     <!-- Create/Edit Form Modal -->
     @if ($showingFormModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4">
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4" role="dialog" aria-modal="true" aria-labelledby="form-modal-title">
             <div class="bg-white rounded-lg max-w-2xl w-full shadow-xl overflow-hidden">
                 <div class="flex justify-between items-center px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-900">
+                    <h3 id="form-modal-title" class="text-lg font-bold text-gray-900">
                         {{ $editingAttendanceId ? 'Edit Attendance Record' : 'Record Attendance' }}
                     </h3>
                     <button wire:click="closeFormModal" aria-label="Close modal" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
@@ -361,9 +361,9 @@
 
     <!-- Delete Confirmation Modal -->
     @if ($confirmingDeletion)
-        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4">
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-attendance-modal-title">
             <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl space-y-4">
-                <h3 class="text-lg font-bold text-gray-900">Confirm Deletion</h3>
+                <h3 id="delete-attendance-modal-title" class="text-lg font-bold text-gray-900">Confirm Deletion</h3>
                 <p class="text-sm text-gray-600">Are you sure you want to delete this attendance record? This action cannot be undone.</p>
                 <div class="flex justify-end gap-3 pt-4">
                     <button wire:click="$set('confirmingDeletion', false)" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300">
