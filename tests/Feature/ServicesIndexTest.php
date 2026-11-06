@@ -77,3 +77,18 @@ test('can delete a service', function () {
         'id' => $service->id,
     ]);
 });
+
+test('delete confirmation modal displays with accessible dialog attributes', function () {
+    $user = User::factory()->create(['role' => 'admin']);
+    $service = Service::factory()->create(['name' => 'Worship Service']);
+
+    Livewire::actingAs($user)
+        ->test(ServicesIndex::class)
+        ->call('confirmDelete', $service->id)
+        ->assertSee('role="dialog"', false)
+        ->assertSee('aria-modal="true"', false)
+        ->assertSee('aria-labelledby="delete-service-modal-title"', false)
+        ->assertSee('id="delete-service-modal-title"', false)
+        ->assertSee('Confirm Delete')
+        ->assertSee('Delete Service');
+});
