@@ -96,12 +96,12 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 @can('update', $group)
-                                    <a href="{{ route('groups.edit', $group) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <a href="{{ route('groups.edit', $group) }}" aria-label="Edit {{ $group->name }}" class="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline">Edit</a>
                                     @if ($group->is_active)
-                                        <button wire:click="confirmInactivate({{ $group->id }})" class="text-amber-600 hover:text-amber-900">Mark inactive</button>
+                                        <button wire:click="confirmInactivate({{ $group->id }})" aria-label="Mark {{ $group->name }} inactive" class="text-amber-600 hover:text-amber-900 focus:outline-none focus:underline">Mark inactive</button>
                                     @endif
                                 @else
-                                    <a href="{{ route('groups.edit', $group) }}" class="text-gray-600 hover:text-gray-900">View</a>
+                                    <a href="{{ route('groups.edit', $group) }}" aria-label="View {{ $group->name }}" class="text-gray-600 hover:text-gray-900 focus:outline-none focus:underline">View</a>
                                 @endcan
                             </td>
                         </tr>
@@ -123,14 +123,17 @@
 
     <!-- Confirmation Modal for Mark Inactive -->
     @if ($confirmingInactivation)
-        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4" role="dialog" aria-modal="true" aria-labelledby="inactivate-group-modal-title">
             <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Confirm Action</h3>
+                <h3 id="inactivate-group-modal-title" class="text-lg font-bold text-gray-900 mb-2">Confirm Action</h3>
                 <p class="text-sm text-gray-600 mb-6">Are you sure you want to mark this group as inactive?</p>
 
                 <div class="flex justify-end gap-3">
-                    <button wire:click="$set('confirmingInactivation', false)" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md">Cancel</button>
-                    <button wire:click="markInactive" class="px-4 py-2 text-sm text-white bg-amber-600 hover:bg-amber-700 rounded-md">Mark Inactive</button>
+                    <button wire:click="$set('confirmingInactivation', false)" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">Cancel</button>
+                    <button wire:click="markInactive" wire:loading.attr="disabled" wire:target="markInactive" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                        <span wire:loading.remove wire:target="markInactive">Mark Inactive</span>
+                        <span wire:loading wire:target="markInactive">Processing...</span>
+                    </button>
                 </div>
             </div>
         </div>
