@@ -63,13 +63,13 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 @can('update', $household)
-                                    <a href="{{ route('households.edit', $household) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <a href="{{ route('households.edit', $household) }}" aria-label="Edit {{ $household->name }}" class="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline">Edit</a>
                                 @else
-                                    <a href="{{ route('households.edit', $household) }}" class="text-gray-600 hover:text-gray-900">View</a>
+                                    <a href="{{ route('households.edit', $household) }}" aria-label="View {{ $household->name }}" class="text-gray-600 hover:text-gray-900 focus:outline-none focus:underline">View</a>
                                 @endcan
 
                                 @can('delete', $household)
-                                    <button wire:click="confirmDelete({{ $household->id }})" class="text-red-600 hover:text-red-900">Delete</button>
+                                    <button wire:click="confirmDelete({{ $household->id }})" aria-label="Delete {{ $household->name }}" class="text-red-600 hover:text-red-900 focus:outline-none focus:underline">Delete</button>
                                 @endcan
                             </td>
                         </tr>
@@ -91,14 +91,17 @@
 
     <!-- Confirmation Modal -->
     @if ($confirmingDeletion)
-        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-gray-900 bg-opacity-50 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-household-modal-title">
             <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Confirm Deletion</h3>
+                <h3 id="delete-household-modal-title" class="text-lg font-bold text-gray-900 mb-2">Confirm Deletion</h3>
                 <p class="text-sm text-gray-600 mb-6">Are you sure you want to delete this household? This action will remove the household record.</p>
 
                 <div class="flex justify-end gap-3">
-                    <button wire:click="$set('confirmingDeletion', false)" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md">Cancel</button>
-                    <button wire:click="deleteHousehold" class="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-md">Delete Household</button>
+                    <button wire:click="$set('confirmingDeletion', false)" class="px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400">Cancel</button>
+                    <button wire:click="deleteHousehold" wire:loading.attr="disabled" wire:target="deleteHousehold" class="inline-flex items-center px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 font-medium">
+                        <span wire:loading.remove wire:target="deleteHousehold">Delete Household</span>
+                        <span wire:loading wire:target="deleteHousehold">Deleting...</span>
+                    </button>
                 </div>
             </div>
         </div>

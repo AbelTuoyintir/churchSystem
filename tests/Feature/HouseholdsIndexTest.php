@@ -32,14 +32,19 @@ test('households index screen lists households and supports searching and filter
         ->assertDontSee('Alpha Family');
 });
 
-test('admin or staff can delete a household using confirm modal', function () {
+test('admin or staff can delete a household using confirm modal with accessible dialog semantics', function () {
     $user = User::factory()->create(['role' => 'admin']);
-    $household = Household::factory()->create();
+    $household = Household::factory()->create(['name' => 'Grace Family']);
 
     Livewire::actingAs($user)
         ->test(Index::class)
+        ->assertSee('aria-label="Delete Grace Family"', false)
+        ->assertSee('aria-label="Edit Grace Family"', false)
         ->call('confirmDelete', $household->id)
         ->assertSet('confirmingDeletion', true)
+        ->assertSee('role="dialog"', false)
+        ->assertSee('aria-labelledby="delete-household-modal-title"', false)
+        ->assertSee('id="delete-household-modal-title"', false)
         ->call('deleteHousehold')
         ->assertSet('confirmingDeletion', false);
 
