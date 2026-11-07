@@ -48,15 +48,22 @@ test('groups index screen lists groups and supports searching and filtering', fu
         ->assertDontSee('Beta Choir');
 });
 
-test('admin or staff can mark group inactive using confirmation modal', function () {
+test('admin or staff can mark group inactive using confirmation modal with accessible dialog semantics', function () {
     $user = User::factory()->create(['role' => 'admin']);
-    $group = Group::factory()->create(['is_active' => true]);
+    $group = Group::factory()->create(['name' => 'Community Outreach', 'is_active' => true]);
 
     Livewire::actingAs($user)
         ->test(Index::class)
+        ->assertSee('aria-label="Edit Community Outreach"', false)
+        ->assertSee('aria-label="Mark Community Outreach inactive"', false)
         ->call('confirmInactivate', $group->id)
         ->assertSet('confirmingInactivation', true)
-        ->call('markInactive');
+        ->assertSee('role="dialog"', false)
+        ->assertSee('aria-modal="true"', false)
+        ->assertSee('aria-labelledby="inactivate-group-modal-title"', false)
+        ->assertSee('id="inactivate-group-modal-title"', false)
+        ->call('markInactive')
+        ->assertSet('confirmingInactivation', false);
 
     $this->assertDatabaseHas('groups', [
         'id' => $group->id,
