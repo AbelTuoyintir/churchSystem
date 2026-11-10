@@ -78,17 +78,22 @@ test('can delete a service', function () {
     ]);
 });
 
-test('delete confirmation modal displays with accessible dialog attributes', function () {
+test('services index table has accessible action labels and modal loading feedback', function () {
     $user = User::factory()->create(['role' => 'admin']);
     $service = Service::factory()->create(['name' => 'Worship Service']);
 
     Livewire::actingAs($user)
         ->test(ServicesIndex::class)
+        ->assertSee('aria-label="Edit Worship Service"', false)
+        ->assertSee('aria-label="Delete Worship Service"', false)
         ->call('confirmDelete', $service->id)
         ->assertSee('role="dialog"', false)
         ->assertSee('aria-modal="true"', false)
         ->assertSee('aria-labelledby="delete-service-modal-title"', false)
         ->assertSee('id="delete-service-modal-title"', false)
+        ->assertSee('wire:loading.attr="disabled"', false)
+        ->assertSee('wire:target="deleteService"', false)
+        ->assertSee('Deleting...')
         ->assertSee('Confirm Delete')
         ->assertSee('Delete Service');
 });
