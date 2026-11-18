@@ -77,10 +77,10 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                 @can('update', $service)
-                                    <a href="{{ route('services.edit', $service) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <a href="{{ route('services.edit', $service) }}" aria-label="Edit {{ $service->name }}" class="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:underline">Edit</a>
                                 @endcan
                                 @can('delete', $service)
-                                    <button wire:click="confirmDelete({{ $service->id }})" class="text-red-600 hover:text-red-900">Delete</button>
+                                    <button wire:click="confirmDelete({{ $service->id }})" aria-label="Delete {{ $service->name }}" class="text-red-600 hover:text-red-900 focus:outline-none focus:underline">Delete</button>
                                 @endcan
                             </td>
                         </tr>
@@ -109,7 +109,10 @@
 
                 <div class="flex justify-end gap-3 pt-2">
                     <button wire:click="$set('confirmingDeletion', false)" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 rounded-md transition">Cancel</button>
-                    <button wire:click="deleteService" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 rounded-md transition">Delete Service</button>
+                    <button wire:click="deleteService" wire:loading.attr="disabled" wire:target="deleteService" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 rounded-md transition">
+                        <span wire:loading.remove wire:target="deleteService">Delete Service</span>
+                        <span wire:loading wire:target="deleteService">Deleting...</span>
+                    </button>
                 </div>
             </div>
         </div>
